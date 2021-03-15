@@ -8,13 +8,13 @@
           this.api = api;
           this.option = option;
         }
-        init(id, domName) {
+        init(id, domId) {
           this.id = id;
-          this.domName = domName;
+          this.domId = domId;
           try {
             const socket = connectManagerURL(this.clientId, this.api, this.id);
             // 소켓 사용
-            ChatService.useSocketArea(socket, this.domName);
+            ChatService.useSocketArea(socket, this.domId);
           } catch (e) {
             SmpChatError.errHandle(e);
           }
@@ -25,12 +25,12 @@
             );
           }
         }
-        static useSocketArea(socket, domName) {
+        static useSocketArea(socket, domId) {
           socket.on("connect", () => {
             console.log("server connect!!");
           });
           socket.on("initChat", (data) => {
-            divideUserType(data, domName);
+            divideUserType(data, domId);
           });
 
           errSocketArea();
@@ -39,14 +39,14 @@
             drawManagerHTML();
             toggleChatView();
           }
-          function divideUserType(data, domName) {
-            if (!domName)
+          function divideUserType(data, domId) {
+            if (!domId)
               throw new SmpChatError("채팅이 그려질 domId를 설정해주세요.");
             // const state = false;
             data.userType === "manager" ? ctrlManagerChat() : ctrlClientChat();
           }
           function drawManagerHTML() {
-            const smpChatLayout = document.querySelector(`${domName}`);
+            const smpChatLayout = document.getElementById(`${domId}`);
             /*****************************  layout *****************************/
             /* common */
             const section = document.createElement("section");
@@ -60,7 +60,7 @@
             const connect = document.createElement("div");
             const dialog = document.createElement("div");
             const smpChatIconImg = document.createElement("img");
-            
+
             /* connect */
             const connNav = document.createElement("div");
             const connNavInfo = document.createElement("h3");
@@ -157,6 +157,7 @@
             connSwitchBall.className = "smpChat__connect__switchBall";
             connSwitchSpan.className = "smpChat__connect__switchSpan";
             connSwitchLabel.className = "smpChat__connect__switchLabel";
+            connSwitchInput.id = "smp_chat_switch";
             connSwitchInput.className = "smpChat__connect__switchInput";
             connSwitchOffP.className =
               "smpChat__connect__switchOff smpChat__userSelect__none";
@@ -169,6 +170,7 @@
             dialogChatFooter.className = "smpChat__dialog__footer";
             dialogChatAddImg.className =
               "smpChat__dialog__addImg smpChat__userSelect__none";
+            dialogChatAddInput.id = "smp_chat_addImg";
             dialogChatAddInput.className = "smpChat__dialog__addInput";
             dialogChatAddLabel.className = "smpChat__dialog__addLabel";
             dialogChatMsgInput.className = "smpChat__dialog__msgInput";
@@ -208,7 +210,6 @@
             connSwitchLabel.htmlFor = "smp_chat_switch";
             connSwitchInput.type = "checkbox";
             connSwitchInput.name = "smp_chat_switch";
-            connSwitchInput.id = "smp_chat_switch";
 
             /* dialog */
             dialogChatAddImg.setAttribute(
@@ -222,7 +223,6 @@
             dialogChatAddLabel.htmlFor = "smp_chat_addImg";
             dialogChatAddInput.type = "file";
             dialogChatAddInput.accept = "image/gif, image/jpeg, image/png";
-            dialogChatAddInput.id = "smp_chat_addImg";
             dialogChatAddInput.name = "smp_chat_addImg";
           }
 
@@ -245,7 +245,6 @@
             socket.on("disconnect", (err) => console.log(err));
             socket.on("error", (err) => console.log(err.content));
           }
-          
         }
       },
     },
