@@ -33,9 +33,9 @@
             divideUserType(data, domName);
           });
 
-          errSocketArea(socket);
+          errSocketArea();
 
-          function ctrlManagerChat(state) {
+          function ctrlManagerChat() {
             drawManagerHTML();
             toggleChatView();
           }
@@ -226,8 +226,20 @@
             dialogChatAddInput.name = "smp_chat_addImg";
           }
 
-    
-          function errSocketArea(socket) {
+          function toggleChatView() {
+            const icon = document.querySelector(".smpChatIcon");
+            const section = document.querySelector(".smpChat__section");
+            const close = document.querySelector(".smpChat__section__close");
+            icon.addEventListener("click", () => {
+              icon.classList.toggle("smp_active");
+              section.classList.toggle("smp_active");
+            });
+            close.addEventListener("click", () => {
+              icon.classList.toggle("smp_active");
+              section.classList.toggle("smp_active");
+            });
+          }
+          function errSocketArea() {
             socket.on("connect_error", (err) => console.log(err));
             socket.on("connect_failed", (err) => console.log(err));
             socket.on("disconnect", (err) => console.log(err));
