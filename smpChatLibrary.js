@@ -12,6 +12,13 @@
           this.id = id;
           this.domId = domId;
           try {
+            const check = argumentsCheck(
+              this.clientId,
+              this.api,
+              this.id,
+              this.domId
+            );
+            if (!check) return;
             const socket = connectManagerURL(this.clientId, this.api, this.id);
             // 소켓 사용
             ChatService.useSocketArea(socket, this.domId);
@@ -23,6 +30,26 @@
             return io(
               `ws://localhost:7000/${apiKey}?CLIENTID=${clientId}&USERID=${managerId}`
             );
+          }
+          function argumentsCheck(clientId, api, id, domId) {
+            let result = true;
+            if (!clientId || clientId == "" || typeof clientId !== "string") {
+              result = false;
+              SmpChatError.errHandle("clientId가 유효하지 않습니다.");
+            }
+            if (!api || api == "" || typeof api !== "string") {
+              result = false;
+              SmpChatError.errHandle("apiKey가 유효하지 않습니다.");
+            }
+            if (id == "") {
+              result = false;
+              SmpChatError.errHandle("id를 입력해주세요.");
+            }
+            if (!domId || domId == "") {
+              result = false;
+              SmpChatError.errHandle("올바른 documentId를 입력해주세요.");
+            }
+            return result;
           }
         }
         static useSocketArea(socket, domId) {
