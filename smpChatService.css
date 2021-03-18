@@ -128,7 +128,7 @@
 .smpChat__connect__switchSpan p {
   font-size: 12px;
   font-weight: 700;
-  margin: 0 4px 0 0;
+  
 }
 
 .smpChat__connect__switchInput {
@@ -136,14 +136,14 @@
 }
 
 .smpChat__connect__switchOff {
-  margin: 0;
   color: #092943;
+  margin: 0 6px 0 0;
 }
 
 .smpChat__connect__switchOn {
-  margin: 0;
   display: none;
   color: #f5f5f6;
+  margin: 0 4px 0 0;
 }
 
 .smpChat__connect__switchInput:checked + .smpChat__connect__switchLabel {
@@ -195,6 +195,7 @@
   background-color: #f5f5f6;
   margin-right: 5px;
   border-radius: 0 15px 15px 0;
+  overflow: hidden;
 }
 
 .smpChat__dialog__navbar {
@@ -207,6 +208,7 @@
 .smpChat__dialog__chatView {
   width: 100%;
   height: 450px;
+  min-height: 300px;
   background-color: #fff;
   overflow-y: scroll;
 }
@@ -228,6 +230,7 @@
   justify-content: space-around;
   align-items: center;
   height: 50px;
+  max-height: 200px;
   width: 100%;
   position: relative;
 }
@@ -237,21 +240,27 @@
   height: 40px;
   border: 0;
   padding: 0;
-  margin-left: 5px;
+  cursor: pointer;
   position: absolute;
   top: 5px;
-  left: 0px;
+  left: 5px;
 }
 
-.smpChat__dialog__msgInput {
+.smpChat__dialog__msgTextArea {
   font-family: "Nanum Gothic Coding", monospace;
   width: 240px;
+  max-height: 180px;
   height: 30px;
+  line-height: 30px;
   border-radius: 0 0 0 0;
   border: 0;
   padding: 0 5px;
   outline: 0;
   margin: 0;
+  resize: none;
+  overflow-y: hidden;
+  position: absolute;
+  top: 10px;
 }
 .smpChat__dialog__sendImg {
   width: 50px;
@@ -259,12 +268,19 @@
   border: 0;
   padding: 0;
   cursor: pointer;
+  position: absolute;
+  top: 0;
+  right: 5px;
 }
 .smpChat__dialog__addLabel {
   width: 40px;
-  height: 50px;
+  height: 40px;
   z-index: 999;
   cursor: pointer;
+  position: absolute;
+  left: 5px;
+  top: 5px;
+  margin: 0;
 }
 .smpChat__dialog__addInput {
   visibility: hidden;

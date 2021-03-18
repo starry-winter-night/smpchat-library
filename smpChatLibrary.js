@@ -65,6 +65,7 @@
           function ctrlManagerChat() {
             drawManagerHTML();
             toggleChatView();
+            changeDialogAreaHeight();
           }
           function divideUserType(data, domId) {
             if (!domId)
@@ -265,6 +266,64 @@
               icon.classList.toggle("smp_active");
               section.classList.toggle("smp_active");
             });
+          }
+          function changeDialogAreaHeight() {
+            const msgInput = document.querySelector(
+              ".smpChat__dialog__msgTextArea"
+            );
+            const footer = document.querySelector(".smpChat__dialog__footer");
+            const chatView = document.querySelector(
+              ".smpChat__dialog__chatView"
+            );
+
+            msgInput.addEventListener("input", applyDialogHeight, false);
+
+            function applyDialogHeight(e) {
+              //const currentHeight = msgInput.scrollHeight;
+              const inputHeight = msgInput.offsetHeight;
+              const footerHeight = footer.offsetHeight;
+              const chatViewHeight = chatView.offsetHeight;
+
+              // textarea의 높이 값을 부여하여 자동으로 높이값을 조절하게 한다.
+              msgInput.style.height = "0px";
+              msgInput.style.height = `${msgInput.scrollHeight}px`;
+              if (msgInput.scrollHeight > inputHeight) {
+                chatView.style.height = `${
+                  chatViewHeight - (msgInput.scrollHeight - inputHeight)
+                }px`;
+                footer.style.height = `${
+                  footerHeight + (msgInput.scrollHeight - inputHeight)
+                }px`;
+              }
+              if (msgInput.scrollHeight < inputHeight) {
+                chatView.style.height = `${
+                  chatViewHeight + (inputHeight - msgInput.scrollHeight)
+                }px`;
+                footer.style.height = `${
+                  footerHeight - (inputHeight - msgInput.scrollHeight)
+                }px`;
+              }
+
+              /******** 중요한 부분이라 크게 남긴다. 미래의 나 보아라. ********/
+              /*                                                               */
+              /*     text가 늘어나서 줄바꿈이 되면                             */
+              /*     currentHeight 와 msgInput.scrollHeight은                  */
+              /*     동시에 값이 바뀌지만 inputHeight는 줄이 바뀌고            */
+              /*     한번 더 put이 되어야 바뀐다.                              */
+              /*                                                               */
+              /*                                                               */
+              /*     text가 줄어들어서 줄바꿈이 되면                           */
+              /*     msgInput.scrollHeight 값이 먼저 바뀌고                    */
+              /*     currentHeight와 inputHeight는 줄이 바뀌고                 */
+              /*     한번 더 put이 되어야 바뀐다.                              */
+              /*                                                               */
+              /*****************************************************************/
+              // console.log("currentHeight:", currentHeight);
+              // console.log("inputHeight:", inputHeight);
+              // console.log("e.target.offsetHeigh:", e.target.offsetHeight);
+              // console.log("msgInput.scrollHeight:",  msgInput.scrollHeight);
+              limitTextAreaHeight(msgInput);
+            }
           }
           function errSocketArea() {
             socket.on("connect_error", (err) => console.log(err));
