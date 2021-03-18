@@ -66,6 +66,7 @@
             drawManagerHTML();
             toggleChatView();
             changeDialogAreaHeight();
+            lineBreakTextArea();
           }
           function divideUserType(data, domId) {
             if (!domId)
@@ -323,6 +324,34 @@
               // console.log("e.target.offsetHeigh:", e.target.offsetHeight);
               // console.log("msgInput.scrollHeight:",  msgInput.scrollHeight);
               limitTextAreaHeight(msgInput);
+            }
+          }
+          function lineBreakTextArea() {
+            const msgInput = document.querySelector(
+              ".smpChat__dialog__msgTextArea"
+            );
+            msgInput.addEventListener("keydown", applyLineBreakHeight, false);
+            function applyLineBreakHeight(e) {
+              if (e.ctrlKey && e.key === "Enter") {
+                const footer = document.querySelector(
+                  ".smpChat__dialog__footer"
+                );
+                const chatView = document.querySelector(
+                  ".smpChat__dialog__chatView"
+                );
+
+                const msgInputHeight = e.target.offsetHeight;
+                const footerHeight = footer.offsetHeight;
+                const chatViewHeight = chatView.offsetHeight;
+
+                msgInput.style.height = `${msgInputHeight + 30}px`;
+                footer.style.height = `${footerHeight + 30}px`;
+                chatView.style.height = `${chatViewHeight - 30}px`;
+
+                e.target.value = `${e.target.value}\r\n`;
+                limitTextAreaHeight(msgInput);
+                focusTextAreaCursor(msgInput);
+              }
             }
           }
           function errSocketArea() {
