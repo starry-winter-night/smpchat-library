@@ -361,6 +361,10 @@
               input.style.overflowY = "hidden";
             }
           }
+          function focusTextAreaCursor(input) {
+            input.blur();
+            input.focus();
+          }
           function errSocketArea() {
             socket.on("connect_error", (err) => console.log(err));
             socket.on("connect_failed", (err) => console.log(err));
