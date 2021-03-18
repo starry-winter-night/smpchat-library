@@ -63,6 +63,7 @@
           errSocketArea();
 
           function ctrlManagerChat() {
+            resetHTML();
             drawManagerHTML();
             toggleChatView();
             changeDialogAreaHeight();
@@ -74,6 +75,17 @@
             // const state = false;
             data.userType === "manager" ? ctrlManagerChat() : ctrlClientChat();
           }
+
+          function resetHTML() {
+            const chatBox = document.getElementById(domId);
+            const section = document.querySelector(".smpChat__section");
+            const icon = document.querySelector(".smpChatIcon");
+            if (chatBox && section && icon) {
+              chatBox.removeChild(section);
+              chatBox.removeChild(icon);
+            }
+          }
+
           function drawManagerHTML() {
             const smpChatLayout = document.getElementById(`${domId}`);
             /*****************************  layout *****************************/
@@ -268,6 +280,7 @@
               section.classList.toggle("smp_active");
             });
           }
+
           function changeDialogAreaHeight() {
             const msgInput = document.querySelector(
               ".smpChat__dialog__msgTextArea"
@@ -326,6 +339,7 @@
               limitTextAreaHeight(msgInput);
             }
           }
+
           function lineBreakTextArea() {
             const msgInput = document.querySelector(
               ".smpChat__dialog__msgTextArea"
@@ -354,6 +368,7 @@
               }
             }
           }
+
           function limitTextAreaHeight(input) {
             if (input.offsetHeight >= 180) {
               input.style.overflowY = "scroll";
@@ -361,10 +376,12 @@
               input.style.overflowY = "hidden";
             }
           }
+
           function focusTextAreaCursor(input) {
             input.blur();
             input.focus();
           }
+
           function errSocketArea() {
             socket.on("connect_error", (err) => console.log(err));
             socket.on("connect_failed", (err) => console.log(err));
