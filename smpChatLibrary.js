@@ -33,6 +33,8 @@
 
             const socket = socketURL(this.args);
 
+            connServer(socket);
+
             socketReceive(socket);
 
             socketSend(socket);
@@ -98,7 +100,6 @@
 
   const managerArea = function ctrlManagerChat({ domId }) {
     managerHTML(domId);
-    connBtn();
     chatIcon();
     dialogHeight();
     textLine();
@@ -414,10 +415,15 @@
     input.focus();
   };
 
-  const connBtn = function ctrlServerConnectBtn() {
+  const connServer = function ctrlServerConnectBtn(socket) {
     const checkbox = document.querySelector(".smpChat__connect__switchInput");
     checkbox.addEventListener("click", () => {
-      socket.emit("connect", { connect: checkbox.checked });
+      if (!checkbox.checked) {
+        socket.close();
+        return;
+      }
+
+      socket.open();
     });
   };
 
