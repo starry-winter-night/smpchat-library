@@ -31,13 +31,13 @@
               ? managerArea(this.args)
               : clientArea(this.args);
 
-            const socket = await socketURL(this.args);
+            const socket = await managerSocketURL(this.args);
 
             switchState(data);
 
-            connServer(socket, data);
+            ctrlServerBtn(socket, data.state);
 
-            socketReceive(socket);
+            socketReceive(socket).connect();
           } catch (e) {
             SmpChatError.errHandle(e);
           }
@@ -47,17 +47,14 @@
   };
 
   const socketReceive = function receiveSocketContact(socket) {
-    socket.on("connect", () => {
-      console.log("server connect!!");
-    });
-
-    socket.on("initChat", (data) => {
-      //processMessageSend(socket);
-    });
-
-    socket.on("preview", (previewData) => {
-      console.log(previewData);
-    });
+    return {
+      connect: () => {
+        socket.on("connect", () => console.log("server connect!!"));
+      },
+      preview: () => {
+        socket.on("preview", (data) => {});
+      },
+    };
   };
 
   const argCheck = function checkMainArguments({
@@ -93,10 +90,17 @@
     return `http://localhost:5000/smpChat?clientId=${clientId}&userId=${userId}`;
   };
 
-  const socketURL = function connectSocketURL({ clientId, apiKey }) {
-    return io(`ws://localhost:7000/${apiKey}?clientId=${clientId}`, {
-      autoConnect: false,
-    });
+  const managerSocketURL = function connectSocketURL({
+    clientId,
+    apiKey,
+    userId,
+  }) {
+    return io(
+      `ws://localhost:7000/${apiKey}?clientId=${clientId}&userId=${userId}`,
+      {
+        autoConnect: false,
+      }
+    );
   };
 
   const managerArea = function ctrlManagerChat({ domId }) {
@@ -113,7 +117,6 @@
   const socketSend = function sendSocketArea(socket) {
     return {
       serverSwitch: (order) => {
-        console.log(order);
         socket.emit("switch", { order });
       },
       message: (msg) => {
@@ -424,20 +427,30 @@
     input.focus();
   };
 
-  const connServer = function ctrlServerConnect(socket, { state }) {
+  const ctrlServerBtn = function ctrlServerConnect(socket, state) {
     const checkbox = document.querySelector(".smpChat__connect__switchInput");
     checkbox.addEventListener("click", async () => {
       if (!checkbox.checked) {
-        socketSend(socket).serverSwitch(false);
-        socket.close();
+        socketSend(socket).serverSwitch("off");
+        turnServer(socket).off();
         return;
       }
-      socketSend(socket).serverSwitch(true);
-      socket.open();
+
+      turnServer(socket).on();
+      socketSend(socket).serverSwitch("on");
     });
+
     if (state === "on") {
-      socket.open();
+      turnServer(socket).on();
+      socketSend(socket).serverSwitch("on");
     }
+  };
+
+  const turnServer = function turnOnOffServer(socket) {
+    return {
+      on: () => socket.open(),
+      off: () => socket.close(),
+    };
   };
 
   const switchState = function changeSwitchState({ state }) {
