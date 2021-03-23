@@ -563,6 +563,15 @@
     msgInput.addEventListener("input", applyDialogHeight, false);
   };
 
+  const styleValue = function getStyleValue(dom, propName) {
+    const style = window.getComputedStyle(dom);
+    return style.getPropertyValue(propName);
+  };
+
+  const removeStr = function removeStringWord(str) {
+    return Number(str.replace(/[^0-9]/g, ""));
+  };
+
   const textLine = function lineBreakTextArea() {
     const msgInput = document.querySelector(".smpChat__dialog__msgTextArea");
     const inputLineHeight = styleValue(msgInput, "line-height");
@@ -571,7 +580,7 @@
       if (e.ctrlKey && e.key === "Enter") {
         const footer = document.querySelector(".smpChat__dialog__footer");
         const chatView = document.querySelector(".smpChat__dialog__chatView");
-        const lineHeight = removeStringWord(inputLineHeight);
+        const lineHeight = removeStr(inputLineHeight);
         const msgInputHeight = e.target.offsetHeight;
         const footerHeight = footer.offsetHeight;
         const chatViewHeight = chatView.offsetHeight;
@@ -594,7 +603,7 @@
   };
 
   const textHeight = function limitTextAreaHeight(dom) {
-    const maxHeight = removeStringWord(styleValue(dom, "max-height"));
+    const maxHeight = removeStr(styleValue(dom, "max-height"));
     if (dom.offsetHeight >= maxHeight) {
       dom.style.overflowY = "scroll";
     } else {
