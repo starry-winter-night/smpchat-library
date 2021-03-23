@@ -111,7 +111,10 @@
   };
 
   const clientArea = function ctrlClientChat({ domId }) {
-    clientHTML();
+    clientHTML(domId);
+    chatIcon();
+    dialogHeight();
+    textLine();
   };
 
   const socketSend = function sendSocketArea(socket) {
@@ -322,6 +325,173 @@
     dialogChatAddInput.name = "smp_chat_addImg";
   };
 
+  const clientHTML = function drawClientHTML(domId) {
+    const smpChatLayout = document.getElementById(domId);
+
+    /*****************************  layout *****************************/
+    /* common */
+    const section = document.createElement("section");
+    const inconsolataFont = document.createElement("link");
+    const josefinSansFont = document.createElement("link");
+    const nanumGothicFont = document.createElement("link");
+    const navbar = document.createElement("div");
+    const contents = document.createElement("div");
+    const logo = document.createElement("h3");
+    const closeImg = document.createElement("img");
+    const dialog = document.createElement("div");
+    const smpChatIconImg = document.createElement("img");
+
+    /* dialog */
+    const dialogNav = document.createElement("div");
+    const dialogSwitch = document.createElement("div");
+    const dialogNavInfo = document.createElement("h3");
+    const dialogSwitchLabel = document.createElement("label");
+    const dialogSwitchBall = document.createElement("span");
+    const dialogSwitchSpan = document.createElement("span");
+    const dialogSwitchInput = document.createElement("input");
+    const dialogSwitchOffP = document.createElement("p");
+    const dialogSwitchOnP = document.createElement("p");
+    const dialogChatView = document.createElement("div");
+    const dialogChatFooter = document.createElement("div");
+    const dialogChatAddImg = document.createElement("img");
+    const dialogChatAddInput = document.createElement("input");
+    const dialogChatAddLabel = document.createElement("label");
+    const dialogChatMsgTextArea = document.createElement("textarea");
+    const dialogChatMsgSend = document.createElement("img");
+
+    /*****************************  node  *****************************/
+    /* common */
+    const logoText = document.createTextNode("smpchat");
+
+    /* dialog */
+    const infoText = document.createTextNode("Web Developer smpark 채팅하기");
+    const connSwitchOff = document.createTextNode("OFF");
+    const connSwitchOn = document.createTextNode("ON");
+
+    /*****************************  appned  *****************************/
+    /* common */
+    section.appendChild(inconsolataFont);
+    section.appendChild(josefinSansFont);
+    section.appendChild(nanumGothicFont);
+    section.appendChild(navbar);
+    section.appendChild(contents);
+    logo.appendChild(logoText);
+    navbar.appendChild(logo);
+    navbar.appendChild(closeImg);
+
+    /* dialog */
+    dialogNavInfo.appendChild(infoText);
+    dialogSwitchOffP.appendChild(connSwitchOff);
+    dialogSwitchOnP.appendChild(connSwitchOn);
+    dialogSwitchSpan.appendChild(dialogSwitchOffP);
+    dialogSwitchSpan.appendChild(dialogSwitchOnP);
+    dialogSwitchLabel.appendChild(dialogSwitchBall);
+    dialogSwitchLabel.appendChild(dialogSwitchSpan);
+    dialogSwitch.appendChild(dialogSwitchInput);
+    dialogSwitch.appendChild(dialogSwitchLabel);
+    dialogNav.appendChild(dialogNavInfo);
+    dialogNav.appendChild(dialogSwitch);
+
+    dialog.appendChild(dialogNav);
+    dialog.appendChild(dialogChatView);
+    dialog.appendChild(dialogChatFooter);
+    dialogChatFooter.appendChild(dialogChatAddImg);
+    dialogChatFooter.appendChild(dialogChatAddLabel);
+    dialogChatFooter.appendChild(dialogChatAddInput);
+    dialogChatFooter.appendChild(dialogChatMsgTextArea);
+    dialogChatFooter.appendChild(dialogChatMsgSend);
+    contents.appendChild(dialog);
+
+    /* smpchat */
+
+    smpChatLayout.appendChild(smpChatIconImg);
+    smpChatLayout.appendChild(section);
+
+    /*****************************  className & id  *****************************/
+    /* common */
+    section.id = "smpChat_clientSection";
+    section.className = "smpChat__section";
+    contents.className = "smpChat__section__contents";
+    navbar.className = "smpChat__section__navbar";
+    dialog.className =
+      "smpChat__section__dialog smpChat__section__clientDialog";
+    logo.className = "smpChat__section__logo smpChat__userSelect__none";
+    closeImg.className = "smpChat__section__close smpChat__userSelect__none";
+    smpChatIconImg.className = "smpChatIcon smpChat__userSelect__none";
+
+    /* dialog */
+    dialogNav.className = "smpChat__dialog__navbar";
+    dialogNavInfo.className =
+      "smpChat__dialog__navInfo smpChat__userSelect__none";
+    dialogSwitch.className = "smpChat__dialog__switch";
+    dialogSwitchBall.className = "smpChat__dialog__switchBall";
+    dialogSwitchSpan.className = "smpChat__dialog__switchSpan";
+    dialogSwitchLabel.className = "smpChat__dialog__switchLabel";
+    dialogSwitchInput.id = "smp_chat_switch";
+    dialogSwitchInput.className = "smpChat__dialog__switchInput";
+    dialogSwitchOffP.className =
+      "smpChat__dialog__switchOff smpChat__userSelect__none";
+    dialogSwitchOnP.className =
+      "smpChat__dialog__switchOn smpChat__userSelect__none";
+    dialogChatView.className = "smpChat__dialog__chatView";
+    dialogChatFooter.className = "smpChat__dialog__footer";
+    dialogChatAddImg.className =
+      "smpChat__dialog__addImg smpChat__userSelect__none";
+    dialogChatAddInput.id = "smp_chat_addImg";
+    dialogChatAddInput.className = "smpChat__dialog__addInput";
+    dialogChatAddLabel.className = "smpChat__dialog__addLabel";
+    dialogChatMsgTextArea.className = "smpChat__dialog__msgTextArea";
+    dialogChatMsgSend.className =
+      "smpChat__dialog__sendImg smpChat__userSelect__none";
+
+    /***************************** set *****************************/
+    /* common */
+    inconsolataFont.setAttribute("rel", "stylesheet");
+    inconsolataFont.setAttribute(
+      "href",
+      "https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;600;700&display=swap"
+    );
+    josefinSansFont.setAttribute("rel", "stylesheet");
+    josefinSansFont.setAttribute(
+      "href",
+      "https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@100;300;400;600;700&display=swap"
+    );
+    nanumGothicFont.setAttribute("rel", "stylesheet");
+    nanumGothicFont.setAttribute(
+      "href",
+      "https://fonts.googleapis.com/css2?family=Nanum+Gothic+Coding&display=swap"
+    );
+
+    smpChatIconImg.setAttribute(
+      "src",
+      "http://localhost:5000/smpChat/image?name=chat.png"
+    );
+    smpChatIconImg.setAttribute("alt", "채팅아이콘");
+    closeImg.setAttribute(
+      "src",
+      "http://localhost:5000/smpChat/image?name=close.png"
+    );
+    closeImg.setAttribute("alt", "채팅창닫기 아이콘");
+
+    /* dialog */
+
+    dialogSwitchLabel.htmlFor = "smp_chat_switch";
+    dialogSwitchInput.type = "checkbox";
+    dialogSwitchInput.name = "smp_chat_switch";
+    dialogChatAddImg.setAttribute(
+      "src",
+      "http://localhost:5000/smpChat/image?name=plus.png"
+    );
+    dialogChatMsgSend.setAttribute(
+      "src",
+      "http://localhost:5000/smpChat/image?name=sendBtn.png"
+    );
+    dialogChatAddLabel.htmlFor = "smp_chat_addImg";
+    dialogChatAddInput.type = "file";
+    dialogChatAddInput.accept = "image/gif, image/jpeg, image/png";
+    dialogChatAddInput.name = "smp_chat_addImg";
+  };
+
   const chatIcon = function toggleChatView() {
     const icon = document.querySelector(".smpChatIcon");
     const section = document.querySelector(".smpChat__section");
@@ -427,8 +597,11 @@
     input.focus();
   };
 
-  const ctrlServerBtn = function ctrlServerConnect(socket, state) {
-    const checkbox = document.querySelector(".smpChat__connect__switchInput");
+  const ctrlServerBtn = function ctrlServerConnect(socket, type, state) {
+    const name = type === "manager" ? "connect" : "dialog";
+    const checkbox = document.querySelector(`.smpChat__${name}__switchInput`);
+    if (!checkbox) return;
+
     checkbox.addEventListener("click", async () => {
       if (!checkbox.checked) {
         socketSend(socket).serverSwitch("off");

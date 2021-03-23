@@ -18,7 +18,6 @@
 }
 
 .smpChat__section {
-  width: 600px;
   height: 600px;
   background-color: #0069c0;
   border-radius: 15px;
@@ -28,6 +27,14 @@
   bottom: 100px;
   right: 0;
   z-index: 999999999;
+}
+
+#smpChat_managerSection {
+  width: 600px;
+}
+
+#smpChat_clientSection {
+  width: 350px;
 }
 
 .smpChat__section.smp_active {
@@ -180,10 +187,12 @@
   width:10px;
   
 }
+
 .smpChat__connect__list::-webkit-scrollbar-thumb {
-  background-color: #0069c0;
+  background-color: #ddd;
   border-radius: 20px;
 } 
+
 .smpChat__connect__list::-webkit-scrollbar-track {
   background-color: #eee;
 }
@@ -193,16 +202,111 @@
   width: 340px;
   height: 545px;
   background-color: #f5f5f6;
-  margin-right: 5px;
-  border-radius: 0 15px 15px 0;
   overflow: hidden;
 }
 
+.smpChat__section__managerDialog {
+  margin-right: 5px;
+  border-radius: 0 15px 15px 0;
+}
+
+.smpChat__section__clientDialog  {
+  margin: auto;
+  border-radius: 15px;
+}
+
 .smpChat__dialog__navbar {
-  background-color: #2196f3;
-  border-radius: 0 15px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   height: 45px;
   width: 100%;
+  padding: 10px;
+  background-color: #2196f3;
+  border-radius: 0 15px 0 0;
+}
+
+.smpChat__dialog__navInfo {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #092943;
+  font-family: "Josefin Sans", sans-serif;
+}
+
+.smpChat__dialog__switchLabel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 60px;
+  height: 25px;
+  margin: 0;
+  background-color: #e1e2e1;
+  border-radius: 15px;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.smpChat__dialog__switchLabel > * {
+  transition: all 0.3s;
+}
+
+.smpChat__dialog__switchBall {
+  height: 27px;
+  width: 27px;
+  background-color: #f5f5f6;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.smpChat__dialog__switchSpan {
+  height: 30px;
+  line-height: 31px;
+}
+
+.smpChat__dialog__switchSpan p {
+  font-size: 12px;
+  font-weight: 700;
+  
+}
+
+.smpChat__dialog__switchInput {
+  display: none;
+}
+
+.smpChat__dialog__switchOff {
+  color: #092943;
+  margin: 0 6px 0 0;
+}
+
+.smpChat__dialog__switchOn {
+  display: none;
+  color: #f5f5f6;
+  margin: 0 4px 0 0;
+}
+
+.smpChat__dialog__switchInput:checked + .smpChat__dialog__switchLabel {
+  background-color: #0069c0;
+}
+
+.smpChat__dialog__switchInput:checked
+  + .smpChat__dialog__switchLabel
+  .smpChat__dialog__switchOn {
+  display: block;
+  transform: translateX(-30px);
+}
+
+.smpChat__dialog__switchInput:checked
+  + .smpChat__dialog__switchLabel
+  .smpChat__dialog__switchOff {
+  display: none;
+}
+
+.smpChat__dialog__switchInput:checked
+  + .smpChat__dialog__switchLabel
+  .smpChat__dialog__switchBall {
+  margin-left: 3px;
+  transform: translateX(30px);
 }
 
 .smpChat__dialog__chatView {
@@ -217,10 +321,12 @@
   width:10px;
   
 }
+
 .smpChat__dialog__chatView::-webkit-scrollbar-thumb {
-  background-color: #0069c0;
+  background-color: #ddd;
   border-radius: 20px;
 } 
+
 .smpChat__dialog__chatView::-webkit-scrollbar-track {
   background-color: #eee;
 }
@@ -262,6 +368,21 @@
   position: absolute;
   top: 10px;
 }
+
+.smpChat__dialog__msgTextArea::-webkit-scrollbar {
+  width:10px;
+  
+}
+
+.smpChat__dialog__msgTextArea::-webkit-scrollbar-thumb {
+  background-color: #ddd;
+  border-radius: 20px;
+}
+
+.smpChat__dialog__msgTextArea::-webkit-scrollbar-track {
+  background-color: #eee;
+}
+
 .smpChat__dialog__sendImg {
   width: 50px;
   height: 50px;
@@ -272,6 +393,7 @@
   top: 0;
   right: 5px;
 }
+
 .smpChat__dialog__addLabel {
   width: 40px;
   height: 40px;
@@ -282,6 +404,7 @@
   top: 5px;
   margin: 0;
 }
+
 .smpChat__dialog__addInput {
   visibility: hidden;
   width: 0;
