@@ -510,6 +510,7 @@
     const msgInput = document.querySelector(".smpChat__dialog__msgTextArea");
     const footer = document.querySelector(".smpChat__dialog__footer");
     const chatView = document.querySelector(".smpChat__dialog__chatView");
+    
     const applyDialogHeight = (e) => {
       //const currentHeight = msgInput.scrollHeight;
       const inputHeight = msgInput.offsetHeight;
@@ -564,32 +565,40 @@
 
   const textLine = function lineBreakTextArea() {
     const msgInput = document.querySelector(".smpChat__dialog__msgTextArea");
-    msgInput.addEventListener("keydown", applyLineBreakHeight, false);
-    function applyLineBreakHeight(e) {
+    const inputLineHeight = styleValue(msgInput, "line-height");
+
+    const applyLineBreakHeight = (e) => {
       if (e.ctrlKey && e.key === "Enter") {
         const footer = document.querySelector(".smpChat__dialog__footer");
         const chatView = document.querySelector(".smpChat__dialog__chatView");
-
+        const lineHeight = removeStringWord(inputLineHeight);
         const msgInputHeight = e.target.offsetHeight;
         const footerHeight = footer.offsetHeight;
         const chatViewHeight = chatView.offsetHeight;
+        const cursorPosition = e.target.selectionStart;
+        const textLineBreak = `${e.target.value}\r\n`;
 
-        msgInput.style.height = `${msgInputHeight + 30}px`;
-        footer.style.height = `${footerHeight + 30}px`;
-        chatView.style.height = `${chatViewHeight - 30}px`;
+        e.target.value = textLineBreak;
 
-        e.target.value = `${e.target.value}\r\n`;
+        if (cursorPosition > 0) {
+          msgInput.style.height = `${msgInputHeight + lineHeight}px`;
+          footer.style.height = `${footerHeight + lineHeight}px`;
+          chatView.style.height = `${chatViewHeight - lineHeight}px`;
+        }
+
         textHeight(msgInput);
         textFocus(msgInput);
       }
-    }
+    };
+    msgInput.addEventListener("keydown", applyLineBreakHeight, false);
   };
 
-  const textHeight = function limitTextAreaHeight(input) {
-    if (input.offsetHeight >= 180) {
-      input.style.overflowY = "scroll";
+  const textHeight = function limitTextAreaHeight(dom) {
+    const maxHeight = removeStringWord(styleValue(dom, "max-height"));
+    if (dom.offsetHeight >= maxHeight) {
+      dom.style.overflowY = "scroll";
     } else {
-      input.style.overflowY = "hidden";
+      dom.style.overflowY = "hidden";
     }
   };
 
@@ -598,7 +607,7 @@
     input.focus();
   };
 
-  const ctrlServerBtn = function ctrlServerConnect(socket, type, state) {
+  const serverBtn = function ctrlServerConnect(socket, type, state) {
     const name = type === "manager" ? "connect" : "dialog";
     const checkbox = document.querySelector(`.smpChat__${name}__switchInput`);
     if (!checkbox) return;
@@ -606,16 +615,16 @@
     checkbox.addEventListener("click", async () => {
       if (!checkbox.checked) {
         socketSend(socket).serverSwitch("off");
-        turnServer(socket).off();
+        ctrlServer(socket).off();
         return;
       }
 
-      turnServer(socket).on();
+      ctrlServer(socket).on();
       socketSend(socket).serverSwitch("on");
     });
 
     if (state === "on") {
-      turnServer(socket).on();
+      ctrlServer(socket).on();
       socketSend(socket).serverSwitch("on");
     }
   };
