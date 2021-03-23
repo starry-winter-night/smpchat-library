@@ -328,8 +328,16 @@
   background-color: #eee;
 }
 
+.smpChat__dialog__container {
+  padding: 15px 15px 0 15px;
+}
+
+.smpChat__dialog__profile {
+  display: block;
+}
+
 .smpChat__dialog__noticeContainer {
-  padding: 15px;
+  padding: 15px 15px 0 15px;
   display: none;
 }
 
@@ -337,13 +345,13 @@
   display: block;
 }
 
-.smpChat__dialog__noticeProfileImage {
+.smpChat__dialog__profileImage {
   width: 35px;
   height: 35px;
   border-radius: 50%;
 }
 
-.smpChat__dialog__noticeId {
+.smpChat__dialog__id {
   display: inline-block;
   font-family: "Inconsolata", monospace;
   font-size: 15px;
@@ -353,26 +361,39 @@
   cursor: default;
 }
 
-.smpChat__dialog__noticeSpan {
-  font-family: "Nanum Gothic Coding", monospace;
+.smpChat__dialog__span {
+  font-family: "Inconsolata", monospace;
   font-weight: 700;
   cursor: default;
 }
 
-.smpChat__dialog__noticeTime {
+.smpChat__dialog__time {
   display: inline-block;
 }
 
-.smpChat__dialog__noticeContents {
-  font-family: "Nanum Gothic Coding", monospace;
-  width: 250px;
+.smpChat__dialog__contentsContainer {
+  max-width: 250px;
   overflow: hidden;
   padding: 10px;
   word-break: break-word;
-  font-size: 13px;
   background-color: #f5f5f6;
   margin-top: 5px;
   border-radius: 0 15px 15px 15px;
+  display: inline-block;
+}
+
+.smpChat__dialog__content {
+  font-family: "Nanum Gothic Coding", monospace;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.smpChat__dialog__content:hover {
+  text-decoration: none;
+}
+
+.smpChat__dialog__content:link {
+  text-decoration: none;
 }
 
 .smpChat__dialog__footer {

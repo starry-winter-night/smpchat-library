@@ -127,6 +127,69 @@
     };
   };
 
+  const msgSend = function sendMessage() {
+    const message = document.querySelector(".smpChat__dialog__msgTextArea");
+    const sendButton = document.querySelector(".smpChat__dialog__sendImg");
+    const chatView = document.querySelector(".smpChat__dialog__chatView");
+
+    const sendMsgEnterKey = (e) => {
+      if (e.key === "Enter" && !e.ctrlKey) {
+        const msg = e.target.value;
+
+        if (!emptyCheck(msg)) {
+          e.preventDefault();
+          return;
+        }
+
+        linkInfo(msg);
+        scrollBottom(chatView);
+        message.value = "";
+        e.preventDefault();
+      }
+    };
+
+    const sendMsgButtonClick = (e) => {
+      const msg = message.value;
+      if (!emptyCheck(msg)) {
+        e.preventDefault();
+        return;
+      }
+
+      linkInfo(msg);
+      scrollBottom(chatView);
+      message.value = "";
+      e.preventDefault();
+    };
+
+    message.addEventListener("keydown", sendMsgEnterKey);
+    sendButton.addEventListener("click", sendMsgButtonClick);
+  };
+
+  const linkInfo = function createLinkInfo(word) {
+    const trimWord = word.trim();
+    if (
+      trimWord === "깃허브" ||
+      trimWord === "깃" ||
+      trimWord.toLowerCase() === "github" ||
+      trimWord.toLowerCase() === "git"
+    ) {
+      const linkAddr = "https://github.com/starry-winter-night";
+      const gitAddr = "github.com/starry-winter-night";
+      messageHTML().link(linkAddr, gitAddr);
+    }
+
+    if (
+      trimWord === "이메일" ||
+      trimWord.toLowerCase() === "email" ||
+      trimWord.toLowerCase() === "mail" ||
+      trimWord === "메일"
+    ) {
+      const linkAddr = "mailto:smpark7723@gmail.com";
+      const gitAddr = "smpark7723@gmail.com";
+      messageHTML().link(linkAddr, gitAddr);
+    }
+  };
+
   const emptyCheck = function checkEmptyString(data) {
     return typeof data.trim() === "string" && data.trim() !== "" ? true : false;
   };
