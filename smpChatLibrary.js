@@ -510,10 +510,7 @@
     const msgInput = document.querySelector(".smpChat__dialog__msgTextArea");
     const footer = document.querySelector(".smpChat__dialog__footer");
     const chatView = document.querySelector(".smpChat__dialog__chatView");
-
-    msgInput.addEventListener("input", applyDialogHeight, false);
-
-    function applyDialogHeight(e) {
+    const applyDialogHeight = (e) => {
       //const currentHeight = msgInput.scrollHeight;
       const inputHeight = msgInput.offsetHeight;
       const footerHeight = footer.offsetHeight;
@@ -522,20 +519,21 @@
       // textarea의 높이 값을 부여하여 자동으로 높이값을 조절하게 한다.
       msgInput.style.height = "0px";
       msgInput.style.height = `${msgInput.scrollHeight}px`;
+      // 핵심은 줄바꿈마다 inputBox의 초기높이 만큼 더하거나 빼준다.
       if (msgInput.scrollHeight > inputHeight) {
         chatView.style.height = `${
-          chatViewHeight - (msgInput.scrollHeight - inputHeight)
+          chatViewHeight - (e.target.offsetHeight - inputHeight)
         }px`;
         footer.style.height = `${
-          footerHeight + (msgInput.scrollHeight - inputHeight)
+          footerHeight + (e.target.offsetHeight - inputHeight)
         }px`;
       }
       if (msgInput.scrollHeight < inputHeight) {
         chatView.style.height = `${
-          chatViewHeight + (inputHeight - msgInput.scrollHeight)
+          chatViewHeight + (inputHeight - e.target.offsetHeight)
         }px`;
         footer.style.height = `${
-          footerHeight - (inputHeight - msgInput.scrollHeight)
+          footerHeight - (inputHeight - e.target.offsetHeight)
         }px`;
       }
 
@@ -553,12 +551,15 @@
       /*     한번 더 put이 되어야 바뀐다.                              */
       /*                                                               */
       /*****************************************************************/
-      // console.log("currentHeight:", currentHeight);
+      //console.log("currentHeight:", currentHeight);
+      // console.log("chatViewHeight", chatViewHeight);
       // console.log("inputHeight:", inputHeight);
       // console.log("e.target.offsetHeigh:", e.target.offsetHeight);
-      // console.log("msgInput.scrollHeight:",  msgInput.scrollHeight);
+      // console.log("msgInput.scrollHeight:", msgInput.scrollHeight);
       textHeight(msgInput);
-    }
+    };
+
+    msgInput.addEventListener("input", applyDialogHeight, false);
   };
 
   const textLine = function lineBreakTextArea() {
