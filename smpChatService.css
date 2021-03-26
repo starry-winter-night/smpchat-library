@@ -313,7 +313,7 @@
   min-height: 360px;
   background-color: #fff;
   overflow-y: scroll;
-  white-space:pre-wrap;
+  white-space: pre-wrap;
 }
 
 .smpChat__dialog__chatView::-webkit-scrollbar {
@@ -337,6 +337,7 @@
   padding: 5px 15px 5px 15px;
   display: flex;
   justify-content: flex-end;
+  align-items: center;
 }
 
 .smpChat__dialog__profile {
@@ -376,6 +377,11 @@
 
 .smpChat__dialog__time {
   display: inline-block;
+  margin: 0;
+  font-size: 11px;
+  padding: 3px 5px 3px 5px;
+  color: #888;
+  cursor: default;
 }
 
 .smpChat__dialog__contentLeft {

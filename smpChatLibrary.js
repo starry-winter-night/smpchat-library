@@ -35,9 +35,9 @@
 
             switchState(data.state);
 
-            serverCtrl(socket, data.type, data.state);
+            serverCtrl(socket, data.state);
 
-            msgSend(socket, data.state);
+            msgSend(socket);
 
             socketReceive(socket).connect();
           } catch (e) {
@@ -51,7 +51,10 @@
   const socketReceive = function receiveSocketContact(socket) {
     return {
       connect: () => {
-        socket.on("connect", () => console.log("server connect!!"));
+        socket.on("connect", () => {
+          socket.sendBuffer = [];
+          console.log("server connect!!");
+        });
       },
       preview: () => {
         socket.on("preview", (data) => {});
@@ -126,11 +129,14 @@
     };
   };
 
-  const msgSend = function sendMessage(socket, state) {
+  const msgSend = function sendMessage(socket) {
     const message = document.querySelector(".smpChat__dialog__msgTextArea");
     const footer = document.querySelector(".smpChat__dialog__footer");
     const chatView = document.querySelector(".smpChat__dialog__chatView");
     const sendButton = document.querySelector(".smpChat__dialog__sendImg");
+    const checkbox =
+      document.querySelector(`.smpChat__connect__switchInput`) ||
+      document.querySelector(`.smpChat__dialog__switchInput`);
 
     const sendMsgEnterKey = (e) => {
       if (e.key === "Enter" && !e.ctrlKey) {
@@ -140,6 +146,8 @@
           e.preventDefault();
           return;
         }
+
+        const state = checkbox.checked ? "on" : "off";
 
         if (state === "on") socketSend(socket).message(msg);
         if (state === "off") messageHTML().offlineMessage(msg);
@@ -164,6 +172,8 @@
         e.preventDefault();
         return;
       }
+
+      const state = checkbox.checked ? "on" : "off";
 
       if (state === "on") socketSend(socket).message(msg);
       if (state === "off") messageHTML().offlineMessage(msg);
@@ -578,6 +588,45 @@
     dialogChatAddInput.name = "smp_chat_addImg";
   };
 
+  const timeData = function createTimeDate(mSec) {
+    const changeNumberFormat = (num) => (num < 10 ? `0${num}` : num);
+
+    const today = mSec ? new Date(mSec) : new Date();
+    const year = today.getFullYear();
+    const month = changeNumberFormat(today.getMonth() + 1);
+    const day = changeNumberFormat(today.getDate());
+    const h = changeNumberFormat(today.getHours());
+    const m = changeNumberFormat(today.getMinutes());
+    const result = mSec
+      ? `${month}월 ${day}일`
+      : `${year}-${month}-${day} ${h}:${m}`;
+
+    return result;
+  };
+
+  const msgTime = function elapseMessageTime(dom) {
+    const dialogTime = dom;
+    const prevTime = new Date(dialogTime.dateTime);
+    const currentTime = new Date(timeData());
+    const elapseTime = currentTime - prevTime;
+    const minutesTime = elapseTime / (1000 * 60);
+    const hourTime = elapseTime / (1000 * 60 * 60);
+    const dayTime = elapseTime / (1000 * 60 * 60 * 24);
+    let word = "방금 전";
+
+    if (minutesTime >= 1 && hourTime < 1) {
+      word = `${minutesTime}분 전`;
+    }
+    if (hourTime >= 1 && dayTime < 1) {
+      word = `약 ${hourTime}시간 전`;
+    }
+    if (dayTime >= 1) {
+      word = timeData(currentTime - elapseTime);
+    }
+    setTimeout(() => msgTime(dom), 1000 * 60);
+    dialogTime.textContent = word;
+  };
+
   const messageHTML = function drawMessageHTML() {
     /*  layout  */
     const dialog = document.querySelector(".smpChat__dialog__chatView");
@@ -586,7 +635,6 @@
     const profileImage = document.createElement("img");
     const id = document.createElement("p");
     const span = document.createElement("span");
-    const time = document.createElement("time");
     const contentsContainer = document.createElement("div");
     const content = document.createElement("p");
 
@@ -598,7 +646,6 @@
     profile.className = "smpChat__dialog__profile";
     profileImage.className = "smpChat__dialog__profileImage";
     id.className = "smpChat__dialog__id";
-    time.className = "smpChat__dialog__time";
     span.className = "smpChat__dialog__span";
 
     /*  set  */
@@ -609,16 +656,19 @@
 
     return {
       noticeClient: () => {
+        /*  layout  */
+        const time = document.createElement("time");
+
         /*  node  */
         const idText = document.createTextNode("smpchat");
         const noticeIdSpan = document.createTextNode("[공지사항]");
-        const noticeContentText = `안녕하세요! 
-        </br>Third_party API SMPCHAT입니다. 
-        </br>우측상단의 버튼을 클릭하시면 채팅서버와 연결됩니다. 
-        </br>하단에서 메세지를 입력 후 엔터 혹은 우측 아이콘을 클릭하시면 관리자와 연결됩니다. 
-        </br>좌측 플러스 버튼으로 이미지를 보내실 수 있습니다.(1MB 이하) 
-        </br>메세지 입력시 컨트롤 + 엔터키를 통해 줄바꿈 하실 수 있습니다. 
-        </br>"깃허브" 또는 "이메일"을 입력하시면 해당 링크를 얻으실 수 있습니다.
+        const noticeContentText = `안녕하세요! Third_party API SMPCHAT의 제작자 sm_Park입니다. :)
+        </br>다음은 SMPCHAT 이용방법 입니다.
+        </br>우측상단 버튼을 클릭시 서버와 연결됩니다. 
+        </br>내용을 입력 후 엔터 또는 우측하단 아이콘 클릭 시 메시지를 보냅니다. 
+        </br>좌측하단 플러스 클릭 시 이미지를 보낼 수 있습니다.(1MB 이하) 
+        </br>메시지 입력 시 컨트롤 + 엔터키를 통해 줄 바꿈 할 수 있습니다. 
+        </br>서버 연결 전 "깃허브" 또는 "이메일"을 입력하시면 해당 링크를 얻을 수 있습니다.
         </br><b>[채팅운영시간]</b> 
         </br>평일 10:00 ~ 18:00 
         </br>감사합니다 :D`;
@@ -640,8 +690,17 @@
         container.className = "smpChat__dialog__containerLeft";
         contentsContainer.className = "smpChat__dialog__contentLeft";
         content.className = "smpChat__dialog__content";
+        time.className = "smpChat__dialog__time";
+
+        /*  set  */
+        time.setAttribute("datetime", timeData());
+
+        msgTime(time);
       },
       noticeManager: () => {
+        /*  layout  */
+        const time = document.createElement("time");
+
         /*  node  */
         const noticeIdSpan = document.createTextNode("[공지사항]");
         const noticeContentText = `안녕하세요! 
@@ -649,7 +708,7 @@
         </br></br> 우측상단의 버튼을 클릭하시면 채팅서버와 연결됩니다. 
         </br></br> 하단에서 메세지를 입력 후 엔터 혹은 우측 아이콘을 클릭하시면 관리자와 연결됩니다. 
         </br></br> 좌측 플러스 버튼으로 이미지를 보내실 수 있습니다.(1MB 이하) 
-        </br></br> 메세지 입력시 컨트롤 + 엔터키를 통해 줄바꿈 하실 수 있습니다. 
+        </br></br> 메시지 입력시 컨트롤 + 엔터키를 통해 줄바꿈 하실 수 있습니다. 
         </br></br> "깃허브" 또는 "이메일"을 입력하시면 해당 링크를 얻으실 수 있습니다.
         </br></br> <b>[채팅운영시간]</b> 
         </br>평일 10:00 ~ 18:00 
@@ -671,10 +730,17 @@
         container.className = "smpChat__dialog__containerLeft";
         contentsContainer.className = "smpChat__dialog__contentLeft";
         content.className = "smpChat__dialog__content";
+        time.className = "smpChat__dialog__time";
+
+        /*  set  */
+        time.setAttribute("datetime", timeData());
+
+        msgTime(time);
       },
       link: (linkAddr, msg) => {
         /*  layout  */
         const link = document.createElement("a");
+        const time = document.createElement("time");
 
         /*  node  */
         const linkMsg = document.createTextNode(msg);
@@ -697,13 +763,19 @@
         container.className = "smpChat__dialog__containerLeft";
         contentsContainer.className = "smpChat__dialog__contentLeft";
         link.className = "smpChat__dialog__content";
+        time.className = "smpChat__dialog__time";
 
         /*  set  */
         link.setAttribute("href", linkAddr);
         link.target = "_blank";
+        time.setAttribute("datetime", timeData());
+
+        msgTime(time);
       },
       offlineMessage: (msg) => {
+        /*  layout  */
         const offline = document.createElement("p");
+        const time = document.createElement("time");
 
         /*  node  */
         const offMessage = document.createTextNode(msg);
@@ -711,6 +783,7 @@
         /*  appned  */
         offline.appendChild(offMessage);
         contentsContainer.appendChild(offline);
+        container.appendChild(time);
         container.appendChild(contentsContainer);
         dialog.appendChild(container);
 
@@ -718,6 +791,12 @@
         container.className = "smpChat__dialog__containerRight";
         contentsContainer.className = "smpChat__dialog__contentRight";
         offline.className = "smpChat__dialog__content";
+        time.className = "smpChat__dialog__time";
+
+        /*  set  */
+        time.setAttribute("datetime", timeData());
+
+        msgTime(time);
       },
     };
   };
@@ -835,9 +914,10 @@
     dom.scrollTop = dom.scrollHeight;
   };
 
-  const serverCtrl = function ctrlServerConnect(socket, type, state) {
-    const name = type === "manager" ? "connect" : "dialog";
-    const checkbox = document.querySelector(`.smpChat__${name}__switchInput`);
+  const serverCtrl = function ctrlServerConnect(socket, state) {
+    const checkbox =
+      document.querySelector(`.smpChat__connect__switchInput`) ||
+      document.querySelector(`.smpChat__dialog__switchInput`);
     if (!checkbox) return;
 
     checkbox.addEventListener("click", async () => {
@@ -860,7 +940,7 @@
   const ctrlServer = function turnOnOffServer(socket) {
     return {
       on: () => socket.open(),
-      off: () => socket.close(),
+      off: () => socket.disconnect(),
     };
   };
 
