@@ -42,6 +42,8 @@
             socketReceive(socket).connect();
 
             socketReceive(socket).switch();
+
+            socketReceive(socket).preview();
           } catch (e) {
             SmpChatError.errHandle(e);
           }
@@ -68,12 +70,12 @@
         });
       },
       preview: () => {
-        socket.on("preview", (data) => {});
+        socket.on("preview", (info) => {
+          messageHTML().preview(info);
+        });
       },
       disconnect: () => {
-        socket.on("disconnect", (data) => {
-          
-        });
+        socket.on("disconnect", (data) => {});
       },
     };
   };
@@ -122,14 +124,12 @@
 
   const managerArea = function ctrlManagerChat({ domId }, state) {
     managerHTML(domId);
-    messageHTML().noticeManager();
     chatIcon();
     dialogHeight();
   };
 
   const clientArea = function ctrlClientChat({ domId }, state) {
     clientHTML(domId);
-    messageHTML().noticeClient();
     chatIcon();
     dialogHeight();
   };
@@ -609,8 +609,8 @@
   };
 
   const messageHTML = function drawMessageHTML() {
-
     /*  layout  */
+    const connect = document.querySelector(".smpChat__connect__list");
     const dialog = document.querySelector(".smpChat__dialog__chatView");
     const container = document.createElement("div");
     const profile = document.createElement("div");
@@ -619,16 +619,12 @@
     const span = document.createElement("span");
     const contentsContainer = document.createElement("div");
     const content = document.createElement("p");
+    const contentImage = document.createElement("img");
+    const time = document.createElement("time");
+    const link = document.createElement("a");
 
     /*  node  */
     const idText = document.createTextNode("smpchat");
-
-    /*  className & id   */
-    container.className = "smpChat__dialog__container";
-    profile.className = "smpChat__dialog__profile";
-    profileImage.className = "smpChat__dialog__profileImage";
-    id.className = "smpChat__dialog__id";
-    span.className = "smpChat__dialog__span";
 
     /*  set  */
     profileImage.setAttribute(
@@ -638,10 +634,6 @@
 
     return {
       noticeClient: () => {
-
-        /*  layout  */
-        const time = document.createElement("time");
-
         /*  node  */
         const idText = document.createTextNode("smpchat");
         const noticeIdSpan = document.createTextNode("[공지사항]");
@@ -671,61 +663,20 @@
         /*  className & id   */
         container.className = "smpChat__dialog__containerLeft";
         contentsContainer.className = "smpChat__dialog__contentLeft";
+        profile.className = "smpChat__dialog__profile";
+        profileImage.className = "smpChat__dialog__profileImage";
         content.className = "smpChat__dialog__content";
         time.className = "smpChat__dialog__time";
+        id.className = "smpChat__dialog__id";
+        span.className = "smpChat__dialog__span";
 
         /*  set  */
         time.setAttribute("datetime", timeData());
 
-        msgTime(time);
-      },
-      noticeManager: () => {
-
-        /*  layout  */
-        const time = document.createElement("time");
-
-        /*  node  */
-        const noticeIdSpan = document.createTextNode("[공지사항]");
-        const noticeContentText = `안녕하세요! 
-        </br></br> Third_party API SMPCHAT입니다. 
-        </br></br> 우측상단의 버튼을 클릭하시면 채팅서버와 연결됩니다. 
-        </br></br> 하단에서 메세지를 입력 후 엔터 혹은 우측 아이콘을 클릭하시면 관리자와 연결됩니다. 
-        </br></br> 좌측 플러스 버튼으로 이미지를 보내실 수 있습니다.(1MB 이하) 
-        </br></br> 메시지 입력시 컨트롤 + 엔터키를 통해 줄바꿈 하실 수 있습니다. 
-        </br></br> "깃허브" 또는 "이메일"을 입력하시면 해당 링크를 얻으실 수 있습니다.
-        </br></br> <b>[채팅운영시간]</b> 
-        </br>평일 10:00 ~ 18:00 
-        </br></br> 감사합니다 :D`;
-
-        /*  appned  */
-        id.appendChild(idText);
-        profile.appendChild(profileImage);
-        profile.appendChild(id);
-        profile.appendChild(span);
-        profile.appendChild(time);
-        content.innerHTML = noticeContentText;
-        span.appendChild(noticeIdSpan);
-        contentsContainer.appendChild(content);
-        container.appendChild(contentsContainer);
-        dialog.appendChild(container);
-
-        /*  className & id   */
-        container.className = "smpChat__dialog__containerLeft";
-        contentsContainer.className = "smpChat__dialog__contentLeft";
-        content.className = "smpChat__dialog__content";
-        time.className = "smpChat__dialog__time";
-
-        /*  set  */
-        time.setAttribute("datetime", timeData());
-
+        /*  function  */
         msgTime(time);
       },
       link: (linkAddr, msg) => {
-
-        /*  layout  */
-        const link = document.createElement("a");
-        const time = document.createElement("time");
-
         /*  node  */
         const linkMsg = document.createTextNode(msg);
         const linkSpan = document.createTextNode("[정보]");
@@ -746,28 +697,28 @@
         /*  className & id   */
         container.className = "smpChat__dialog__containerLeft";
         contentsContainer.className = "smpChat__dialog__contentLeft";
+        profile.className = "smpChat__dialog__profile";
+        profileImage.className = "smpChat__dialog__profileImage";
         link.className = "smpChat__dialog__content";
         time.className = "smpChat__dialog__time";
+        id.className = "smpChat__dialog__id";
+        span.className = "smpChat__dialog__span";
 
         /*  set  */
         link.setAttribute("href", linkAddr);
         link.target = "_blank";
         time.setAttribute("datetime", timeData());
 
+        /*  function  */
         msgTime(time);
       },
       offlineMessage: (msg) => {
-
-        /*  layout  */
-        const offline = document.createElement("p");
-        const time = document.createElement("time");
-
         /*  node  */
         const offMessage = document.createTextNode(msg);
 
         /*  appned  */
-        offline.appendChild(offMessage);
-        contentsContainer.appendChild(offline);
+        content.appendChild(offMessage);
+        contentsContainer.appendChild(content);
         container.appendChild(time);
         container.appendChild(contentsContainer);
         dialog.appendChild(container);
@@ -775,19 +726,19 @@
         /*  className & id   */
         container.className = "smpChat__dialog__containerRight";
         contentsContainer.className = "smpChat__dialog__contentRight";
-        offline.className = "smpChat__dialog__content";
+        content.className = "smpChat__dialog__content";
         time.className = "smpChat__dialog__time";
 
         /*  set  */
         time.setAttribute("datetime", timeData());
 
+        /*  function  */
         msgTime(time);
       },
       systemMessage: (state, msg = false) => {
-
         /*  layout  */
-        const systemBar = document.createElement("div");
-        const systemMsg = document.createElement("p");
+        const container = document.createElement("div");
+        const content = document.createElement("p");
 
         /*  node  */
         let systemMsgText = null;
@@ -807,15 +758,68 @@
         }
 
         /*  appned  */
-        systemMsg.appendChild(systemMsgText);
-        systemBar.appendChild(systemMsg);
-        dialog.appendChild(systemBar);
+        content.appendChild(systemMsgText);
+        container.appendChild(content);
+        dialog.appendChild(container);
 
         /*  className & id   */
-        systemBar.className = "smpChat__dialog__systemBar";
-        systemMsg.className = "smpChat__dialog__systemMsg";
+        container.className = "smpChat__dialog__systemBar";
+        content.className = "smpChat__dialog__systemMsg";
 
+        /*  function  */
         scrollBottom(dialog);
+      },
+      preview: ({ userId, message, registerTime, image }) => {
+        const prevId = document.querySelector(
+          `.smpChat__connect__id_${userId}`
+        );
+
+        if (prevId === null || prevId.textContent !== userId) {
+          /*  node  */
+          const idText = document.createTextNode(userId);
+          const messageText = document.createTextNode(message);
+
+          /*  appned  */
+          id.appendChild(idText);
+          content.appendChild(messageText);
+          container.appendChild(id);
+          container.appendChild(time);
+          contentsContainer.appendChild(content);
+          contentsContainer.appendChild(contentImage);
+          container.appendChild(contentsContainer);
+          connect.appendChild(container);
+
+          /*  className & id   */
+          container.className = "smpChat__connect__container";
+          id.className = `smpChat__connect__id smpChat__connect__id_${userId}`;
+          time.className = `smpChat__connect__time smpChat__connect__time_${userId}`;
+          content.className = `smpChat__connect__content smpChat__connect__content_${userId}`;
+          contentsContainer.className = "smpChat__connect__contentsContainer";
+
+          /*  set  */
+          time.setAttribute("datetime", registerTime);
+
+          /*  function  */
+          msgTime(time);
+
+          return;
+        }
+
+        const prevContent = document.querySelector(
+          `.smpChat__connect__content_${userId}`
+        );
+        const prevTime = document.querySelector(
+          `.smpChat__connect__time_${userId}`
+        );
+
+        prevTime.setAttribute("datetime", registerTime);
+        prevId.textContent = userId;
+        prevContent.textContent = message;
+
+        /*  function  */
+        msgTime(prevTime);
+
+        return;
       },
     };
   };
@@ -861,20 +865,17 @@
     const icon = document.querySelector(".smpChatIcon");
     const section = document.querySelector(".smpChat__section");
     const close = document.querySelector(".smpChat__section__close");
-    const notice = document.querySelector(".smpChat__dialog__contentLeft");
     const chatView = document.querySelector(".smpChat__dialog__chatView");
 
     icon.addEventListener("click", () => {
       icon.classList.toggle("smp_active");
       section.classList.toggle("smp_active");
-      notice.classList.toggle("smp_active");
       scrollBottom(chatView);
     });
 
     close.addEventListener("click", () => {
       icon.classList.toggle("smp_active");
       section.classList.toggle("smp_active");
-      notice.classList.toggle("smp_active");
     });
   };
 
@@ -1003,7 +1004,9 @@
     }
 
     if (state === "off") {
+      messageHTML().noticeClient();
       messageHTML().systemMessage(state);
+      return;
     }
   };
 
