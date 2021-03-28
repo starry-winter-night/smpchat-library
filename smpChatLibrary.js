@@ -35,9 +35,11 @@
 
             switchState(data.state);
 
-            serverCtrl(socket, data.state);
+            refleshConn(socket, data.state);
 
-            msgSend(socket);
+            clickConn(socket);
+
+            messageSend(socket);
 
             socketReceive(socket).connect();
 
@@ -63,7 +65,7 @@
       switch: () => {
         socket.on("switch", (state) => {
           if (state === "off") {
-            ctrlServer(socket).off();
+            connServer(socket).off();
           }
 
           messageHTML().systemMessage(state);
@@ -71,11 +73,22 @@
       },
       preview: () => {
         socket.on("preview", (info) => {
-          messageHTML().preview(info);
+          info.forEach((logs) => messageHTML().preview(logs));
         });
       },
       disconnect: () => {
         socket.on("disconnect", (data) => {});
+      },
+    };
+  };
+
+  const socketSend = function sendSocketArea(socket) {
+    return {
+      serverSwitch: (state) => {
+        socket.emit("switch", state);
+      },
+      message: (msg) => {
+        socket.emit("message", msg);
       },
     };
   };
@@ -122,30 +135,19 @@
     );
   };
 
-  const managerArea = function ctrlManagerChat({ domId }, state) {
+  const managerArea = function ctrlManagerChat({ domId }) {
     managerHTML(domId);
     chatIcon();
     dialogHeight();
   };
 
-  const clientArea = function ctrlClientChat({ domId }, state) {
+  const clientArea = function ctrlClientChat({ domId }) {
     clientHTML(domId);
     chatIcon();
     dialogHeight();
   };
 
-  const socketSend = function sendSocketArea(socket) {
-    return {
-      serverSwitch: (state) => {
-        socket.emit("switch", state);
-      },
-      message: (msg) => {
-        socket.emit("message", msg);
-      },
-    };
-  };
-
-  const msgSend = function sendMessage(socket) {
+  const messageSend = function sendMessage(socket) {
     const message = document.querySelector(".smpChat__dialog__msgTextArea");
     const footer = document.querySelector(".smpChat__dialog__footer");
     const chatView = document.querySelector(".smpChat__dialog__chatView");
@@ -948,6 +950,7 @@
 
   const styleValue = function getStyleValue(dom, propName) {
     const style = window.getComputedStyle(dom);
+
     return style.getPropertyValue(propName);
   };
 
@@ -970,47 +973,57 @@
   const textFocus = function focusTextAreaCursor(input) {
     input.blur();
     input.focus();
+
     return;
   };
 
   const scrollBottom = function fixScrollBottom(dom) {
     dom.scrollTop = dom.scrollHeight;
+
     return;
   };
 
-  const serverCtrl = function ctrlServerConnect(socket, state) {
-    const checkbox =
-      document.querySelector(`.smpChat__connect__switchInput`) ||
-      document.querySelector(`.smpChat__dialog__switchInput`);
-    if (!checkbox) return;
-
-    checkbox.addEventListener("click", async () => {
-      state = !checkbox.checked ? "off" : "on";
-
-      if (!checkbox.checked) {
-        socketSend(socket).serverSwitch(state);
-        return;
-      }
-
-      ctrlServer(socket).on();
-      socketSend(socket).serverSwitch(state);
-      return;
-    });
-
+  const refleshConn = function refleshServerConnect(socket, state) {
     if (state === "on") {
-      ctrlServer(socket).on();
+      connServer(socket).on();
       socketSend(socket).serverSwitch(state);
+
       return;
     }
 
     if (state === "off") {
       messageHTML().noticeClient();
       messageHTML().systemMessage(state);
+
       return;
     }
   };
 
-  const ctrlServer = function turnOnOffServer(socket) {
+  const clickConn = function clickServerConnect(socket) {
+    const checkbox =
+      document.querySelector(`.smpChat__connect__switchInput`) ||
+      document.querySelector(`.smpChat__dialog__switchInput`);
+    if (!checkbox) return;
+
+    const ctrlServer = () => {
+      state = !checkbox.checked ? "off" : "on";
+
+      if (!checkbox.checked) {
+        socketSend(socket).serverSwitch(state);
+
+        return;
+      }
+
+      connServer(socket).on();
+      socketSend(socket).serverSwitch(state);
+
+      return;
+    };
+
+    checkbox.addEventListener("click", ctrlServer, false);
+  };
+
+  const connServer = function turnOnOffServer(socket) {
     return {
       on: () => socket.open(),
       off: () => socket.disconnect(),
