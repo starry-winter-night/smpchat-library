@@ -31,6 +31,13 @@
               ? managerArea(this.args, data.state)
               : clientArea(this.args, data.state);
 
+            /* 서버에서 인증여부 가져와서 false면 
+               입력창 하나 만들고 
+               거기에 직접 api키를 넣게 만들어서
+               서버에 던지고 맞으면 인증ok 
+               레퍼러 검사해서 같은 레퍼러면 계속 통과
+               다른 레퍼러에서 넘어오면 다시 인증
+            */
             const socket = await socketURL(this.args);
 
             changeSwitch(data.state);
@@ -41,6 +48,10 @@
 
             messageSend(socket);
 
+            dialogScroll(socket);
+
+            socketReceive(socket).error();
+
             socketReceive(socket).connect();
 
             socketReceive(socket).switch();
@@ -50,6 +61,8 @@
             socketReceive(socket).preview();
 
             socketReceive(socket).dialog(userId);
+
+            socketReceive(socket).prevDialog(userId);
 
             socketReceive(socket).message(userId);
           } catch (e) {
@@ -114,6 +127,25 @@
           dialog.forEach((logs) => {
             contentsHTML().dialog(logs, userId);
           });
+
+          const chatView = document.querySelector(".smpChat__dialog__chatView");
+
+          scrollBottom(chatView);
+        });
+      },
+      prevDialog: (userId) => {
+        socket.on("prevDialog", (dialog) => {
+          const chatView = document.querySelector(".smpChat__dialog__chatView");
+          const prevHeight = chatView.scrollHeight;
+
+          dialog.reverse().forEach((logs) => {
+            contentsHTML().prevDialog(logs, userId);
+          });
+
+          const afterHeight = chatView.scrollHeight;
+          const increaseHeight = (afterHeight - prevHeight);
+
+          scrollIncrease(chatView, increaseHeight);
         });
       },
       message: (userId) => {
@@ -123,6 +155,14 @@
       },
       disconnect: () => {
         socket.on("disconnect", (data) => {});
+      },
+      error: () => {
+        socket.on("connect_error", (err) => {
+          if (err.data.message === "duplicate_connection") {
+            changeSwitch(err.data.state);
+            contentsHTML().alert();
+          }
+        });
       },
     };
   };
@@ -137,6 +177,9 @@
       },
       dialog: (userId) => {
         socket.emit("dialog", userId);
+      },
+      prevDialog: (seq) => {
+        socket.emit("prevDialog", seq);
       },
     };
   };
@@ -175,12 +218,17 @@
   };
 
   const socketURL = function connectSocketURL({ clientId, apiKey, userId }) {
-    return io(
-      `ws://localhost:7000/${apiKey}?clientId=${clientId}&userId=${userId}`,
-      {
-        autoConnect: false,
-      }
-    );
+    return io(`ws://localhost:7000/${clientId}`, {
+      reconnectionDelayMax: 10000,
+      autoConnect: false,
+      auth: {
+        apiKey,
+      },
+      query: {
+        userId,
+        clientId,
+      },
+    });
   };
 
   const managerArea = function ctrlManagerChat({ domId }) {
@@ -705,13 +753,13 @@
         /*  textNode  */
         const idText = document.createTextNode("smpchat");
         const noticeIdSpan = document.createTextNode("[공지사항]");
-        const noticeContentText = `안녕하세요! Third_party API SMPCHAT 제작자 sm_Park입니다 :)
-        </br>다음은 SMPCHAT 이용방법 입니다.
+        const noticeContentText = `안녕하세요! 이용방법을 읽어주세요.
         </br>우측상단 버튼을 클릭시 서버와 연결됩니다. 
-        </br>내용을 입력 후 엔터 또는 우측하단 아이콘 클릭 시 메시지를 보냅니다. 
-        </br>좌측하단 플러스 클릭 시 이미지를 보낼 수 있습니다.(1MB 이하) 
         </br>메시지 입력 시 컨트롤 + 엔터키를 통해 줄 바꿈 할 수 있습니다. 
+        </br>메시지 입력 후 엔터 또는 우측하단 아이콘 클릭 시 전송됩니다. 
+        </br>좌측하단 플러스 아이콘으로 이미지를 보낼 수 있습니다.(1MB 이하) 
         </br>서버 연결 전 "깃허브" 또는 "이메일"을 입력하시면 해당 링크를 얻을 수 있습니다.
+        </br>서버 연결 전 메시지는 저장되지 않으며 새로고침 또는 서버 연결 시 삭제됩니다.
         </br><b>[채팅운영시간]</b></br>평일 10:00 ~ 18:00 
         </br>감사합니다 :D`;
 
@@ -787,6 +835,47 @@
 
         /*  function  */
         msgTime(time);
+      },
+      alert: () => {
+        /*  textNode  */
+        const idText = document.createTextNode("smpchat");
+        const noticeIdSpan = document.createTextNode("[공지사항]");
+        const noticeContentText = `사용자가 이미 채팅 서버를 이용 중입니다.
+         </br>기존에 채팅 서버를 이용 중이 아니시라면 30초 뒤에 다시 서버를 실행해 주세요.`;
+
+        /*  appned  */
+        id.appendChild(idText);
+        profile.appendChild(profileImage);
+        profile.appendChild(id);
+        profile.appendChild(span);
+        profile.appendChild(time);
+        container.appendChild(profile);
+        content.innerHTML = noticeContentText;
+        span.appendChild(noticeIdSpan);
+        contentsContainer.appendChild(content);
+        container.appendChild(contentsContainer);
+        dialog.appendChild(container);
+
+        /*  className & id   */
+        container.className = "smpChat__dialog__containerLeft";
+        contentsContainer.className = "smpChat__dialog__contentContainerLeft";
+        profile.className = "smpChat__dialog__profile";
+        profileImage.className = "smpChat__dialog__profileImage";
+        content.className = "smpChat__dialog__content";
+        time.className = "smpChat__dialog__time";
+        id.className = "smpChat__dialog__id";
+        span.className = "smpChat__dialog__span";
+
+        /*  set  */
+        time.setAttribute("datetime", timeData());
+        profileImage.setAttribute(
+          "src",
+          "http://localhost:5000/smpChat/image?name=smpark.jpg"
+        );
+
+        /*  function  */
+        msgTime(time);
+        scrollBottom(dialog);
       },
       offlineMessage: (msg) => {
         /*  textNode  */
@@ -867,7 +956,7 @@
 
         /*  set  */
         time.setAttribute("datetime", registerTime);
-        content.dataset.seq = seq;
+        container.dataset.seq = seq;
         profileImage.setAttribute(
           "src",
           "http://localhost:5000/smpChat/image?name=발리.jpg"
@@ -875,7 +964,72 @@
 
         /*  function  */
         msgTime(time);
-        scrollBottom(dialog);
+
+        return;
+      },
+      prevDialog: (msg, currentUserId) => {
+        const { seq, userId, message, registerTime, roomName, image } = msg;
+
+        const chatView = document.querySelector(
+          `.smpChat__dialog__chatView_${currentUserId}`
+        );
+
+        if (!chatView) {
+          dialog.classList.add(`smpChat__dialog__chatView_${roomName}`);
+        }
+
+        /*  textNode  */
+        const onMessage = document.createTextNode(message);
+        const idText = document.createTextNode(userId);
+
+        if (userId !== currentUserId) {
+          /*  appned  */
+          id.appendChild(idText);
+          profile.appendChild(profileImage);
+          profile.appendChild(id);
+          profile.appendChild(span);
+          profile.appendChild(time);
+          container.appendChild(profile);
+
+          /*  className & id   */
+          id.className = "smpChat__dialog__id";
+          profile.className = "smpChat__dialog__profile";
+          profileImage.className = "smpChat__dialog__profileImage";
+          container.className = `smpChat__dialog__containerLeft smpChat__dialog__containerLeft_${userId}`;
+          contentsContainer.className = "smpChat__dialog__contentContainerLeft";
+        }
+
+        if (userId === currentUserId) {
+          /*  appned  */
+          container.appendChild(time);
+
+          /*  className & id   */
+          container.className = `smpChat__dialog__containerRight smpChat__dialog__containerRight_${userId}`;
+          contentsContainer.className =
+            "smpChat__dialog__contentContainerRight";
+        }
+
+        /*  appned  */
+        content.appendChild(onMessage);
+        contentsContainer.appendChild(content);
+        container.appendChild(contentsContainer);
+
+        dialog.prepend(container);
+
+        /*  className & id   */
+        content.className = `smpChat__dialog__content smpChat__dialog__content_${userId}`;
+        time.className = `smpChat__dialog__time smpChat__dialog__time_${userId}`;
+
+        /*  set  */
+        time.setAttribute("datetime", registerTime);
+        container.dataset.seq = seq;
+        profileImage.setAttribute(
+          "src",
+          "http://localhost:5000/smpChat/image?name=발리.jpg"
+        );
+
+        /*  function  */
+        msgTime(time);
 
         return;
       },
@@ -1133,6 +1287,12 @@
     return;
   };
 
+  const scrollIncrease = function fixScrollIncrease(dom, height) {
+    dom.scrollTop = height;
+
+    return;
+  };
+
   const scrollBottom = function fixScrollBottom(dom) {
     dom.scrollTop = dom.scrollHeight;
 
@@ -1191,11 +1351,13 @@
       document.querySelector(".smpChat__connect__switchInput") ||
       document.querySelector(".smpChat__dialog__switchInput");
     if (state === "on") {
-      return (checkbox.checked = true);
+      checkbox.checked = true;
+      return;
     }
 
     if (state === "off") {
-      return (checkbox.checked = false);
+      checkbox.checked = false;
+      return;
     }
   };
 
@@ -1217,6 +1379,18 @@
     list.addEventListener("click", clickPreviewHandler);
 
     return;
+  };
+
+  const dialogScroll = function loadDialogScroll(socket) {
+    const chatView = document.querySelector(".smpChat__dialog__chatView");
+
+    chatView.addEventListener("scroll", () => {
+      const currentScrollY = chatView.scrollTop;
+      if (currentScrollY === 0) {
+        const chatSeq = chatView.firstChild.dataset.seq;
+        socketSend(socket).prevDialog(chatSeq);
+      }
+    });
   };
 
   class SmpChatError extends Error {
