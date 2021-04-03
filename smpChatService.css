@@ -1,3 +1,38 @@
+:root[user-theme="blue"] {
+  --smpchat_color-white: #ffffff;
+  --smpchat_color-light-white: #f5f5f6;
+  --smpchat_color-dark-white: #dddddd;
+  --smpchat_color-pink: #fe918d;
+  --smpchat_color-dark-pink: #ff6863;
+  --smpchat_color-dark-grey: #555555;
+  --smpchat_color-grey: #888888;
+  --smpchat_color-light-grey: #e1e2e1;
+  --smpchat_color-white-grey: #eeeeee;
+  --smpchat_color-navSubBar: #2196f3;
+  --smpchat_color-navBar: #0069c0;
+  --smpchat_color-light-yellow: #fff7d1;
+  --smpchat_color-orange: #f35f2c;
+  --smpchat_color-yellow: #f2d038;
+  --smpchat_color-light-black: #092943;
+}
+:root[user-theme="red"] {
+  --smpchat_color-white: #ffffff;
+  --smpchat_color-light-white: #f5f5f6;
+  --smpchat_color-dark-white: #dddddd;
+  --smpchat_color-pink: #fe918d;
+  --smpchat_color-dark-pink: #ff6863;
+  --smpchat_color-dark-grey: #555555;
+  --smpchat_color-grey: #888888;
+  --smpchat_color-light-grey: #e1e2e1;
+  --smpchat_color-white-grey: #eeeeee;
+  --smpchat_color-navSubBar: #ff0084;
+  --smpchat_color-navBar: #c60058;
+  --smpchat_color-light-yellow: #fff7d1;
+  --smpchat_color-orange: #f35f2c;
+  --smpchat_color-yellow: #f2d038;
+  --smpchat_color-light-black: #092943;
+}
+
 /* Manager HTML */
 /* common */
 .smpChat__userSelect__none {
@@ -19,7 +54,7 @@
 
 .smpChat__section {
   height: 700px;
-  background-color: #0069c0;
+  background-color: var(--smpchat_color-navBar);
   border-radius: 15px;
   display: none;
 
@@ -54,30 +89,40 @@
   width: 100%;
   height: 50px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
   padding: 15px 5px 15px 20px;
+  position: relative;
 }
 
 .smpChat__section__logo {
   margin: 0;
-  color: #f5f5f6;
+  color: var(--smpchat_color-light-white);
   font-family: "Inconsolata", monospace;
   text-transform: uppercase;
   letter-spacing: 0.5rem;
+}
+
+.smpChat__section__theme {
+  max-width: 50px;
+  max-height: 50px;
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
 }
 
 .smpChat__section__close {
   width: 45px;
   height: 45px;
   cursor: pointer;
+  position: absolute;
+  right: 10px;
 }
 
 /* connect */
 .smpChat__section__connect {
   width: 245px;
   height: 645px;
-  background-color: #f5f5f6;
+  background-color: var(--smpchat_color-light-white);
   margin-left: 5px;
   border-radius: 15px 0 0 15px;
   position: relative;
@@ -90,7 +135,7 @@
   height: 45px;
   width: 100%;
   padding: 10px;
-  background-color: #2196f3;
+  background-color: var(--smpchat_color-navSubBar);
   border-radius: 15px 0 0 0;
 }
 
@@ -98,7 +143,7 @@
   margin: 0;
   font-size: 14px;
   font-weight: 700;
-  color: #092943;
+  color: var(--smpchat_color-light-black);
   font-family: "Josefin Sans", sans-serif;
 }
 
@@ -109,7 +154,7 @@
   width: 60px;
   height: 25px;
   margin: 0;
-  background-color: #e1e2e1;
+  background-color: var(--smpchat_color-light-grey);
   border-radius: 15px;
   transition: all 0.3s;
   cursor: pointer;
@@ -122,7 +167,7 @@
 .smpChat__connect__switchBall {
   height: 27px;
   width: 27px;
-  background-color: #f5f5f6;
+  background-color: var(--smpchat_color-light-white);
   border-radius: 50%;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
@@ -142,18 +187,18 @@
 }
 
 .smpChat__connect__switchOff {
-  color: #092943;
+  color: var(--smpchat_color-light-black);
   margin: 0 6px 0 0;
 }
 
 .smpChat__connect__switchOn {
   display: none;
-  color: #f5f5f6;
+  color: var(--smpchat_color-light-white);
   margin: 0 4px 0 0;
 }
 
 .smpChat__connect__switchInput:checked + .smpChat__connect__switchLabel {
-  background-color: #0069c0;
+  background-color: var(--smpchat_color-navBar);
 }
 
 .smpChat__connect__switchInput:checked
@@ -180,7 +225,7 @@
   overflow-y: scroll;
   width: 100%;
   height: 600px;
-  scrollbar-color: #ddd;
+  scrollbar-color: var(--smpchat_color-dark-white);
   scrollbar-width: thin;
 }
 
@@ -189,22 +234,22 @@
 }
 
 .smpChat__connect__list::-webkit-scrollbar-thumb {
-  background-color: #ddd;
+  background-color: var(--smpchat_color-dark-white);
   border-radius: 20px;
 }
 
 .smpChat__connect__list::-webkit-scrollbar-track {
-  background-color: #eee;
+  background-color: var(--smpchat_color-white-grey);
 }
 
 .smpChat__connect__container {
-  background-color: #fff;
+  background-color: var(--smpchat_color-white);
   font-family: "Nanum Gothic Coding", monospace;
   cursor: pointer;
 }
 
 .smpChat__connect__id {
-  width: 65%;
+  width: 60%;
   display: inline-block;
   padding: 5px 0 5px 10px;
   margin: 0;
@@ -214,18 +259,18 @@
 }
 
 .smpChat__connect__time {
-  width: 35%;
+  width: 40%;
   display: inline-block;
-  padding: 5px 0;
+  padding: 5px 10px 5px 0;
   text-align: right;
   font-size: 12px;
-  color: #888;
+  color: var(--smpchat_color-grey);
   overflow: hidden;
 }
 
 .smpChat__connect__content {
   margin: 0;
-  color: #555;
+  color: var(--smpchat_color-dark-grey);
   font-size: 12px;
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -243,7 +288,7 @@
 .smpChat__section__dialog {
   width: 340px;
   height: 645px;
-  background-color: #f5f5f6;
+  background-color: var(--smpchat_color-light-white);
   overflow: hidden;
 }
 
@@ -264,7 +309,7 @@
   height: 45px;
   width: 100%;
   padding: 10px;
-  background-color: #2196f3;
+  background-color: var(--smpchat_color-navSubBar);
   border-radius: 0 15px 0 0;
 }
 
@@ -272,7 +317,7 @@
   margin: 0;
   font-size: 14px;
   font-weight: 700;
-  color: #092943;
+  color: var(--smpchat_color-light-black);
   font-family: "Josefin Sans", sans-serif;
 }
 
@@ -283,7 +328,7 @@
   width: 60px;
   height: 25px;
   margin: 0;
-  background-color: #e1e2e1;
+  background-color: var(--smpchat_color-light-grey);
   border-radius: 15px;
   transition: all 0.3s;
   cursor: pointer;
@@ -296,7 +341,7 @@
 .smpChat__dialog__switchBall {
   height: 27px;
   width: 27px;
-  background-color: #f5f5f6;
+  background-color: var(--smpchat_color-light-white);
   border-radius: 50%;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
@@ -316,18 +361,18 @@
 }
 
 .smpChat__dialog__switchOff {
-  color: #092943;
+  color: var(--smpchat_color-light-black);
   margin: 0 6px 0 0;
 }
 
 .smpChat__dialog__switchOn {
   display: none;
-  color: #f5f5f6;
+  color: var(--smpchat_color-light-white);
   margin: 0 4px 0 0;
 }
 
 .smpChat__dialog__switchInput:checked + .smpChat__dialog__switchLabel {
-  background-color: #0069c0;
+  background-color: var(--smpchat_color-navBar);
 }
 
 .smpChat__dialog__switchInput:checked
@@ -355,10 +400,10 @@
   height: 540px;
   max-height: 540px;
   min-height: 360px;
-  background-color: #fff;
+  background-color: var(--smpchat_color-white);
   overflow-y: scroll;
   white-space: pre-wrap;
-  scrollbar-color: #ddd;
+  scrollbar-color: var(--smpchat_color-dark-white);
   scrollbar-width: thin;
 }
 
@@ -367,12 +412,16 @@
 }
 
 .smpChat__dialog__chatView::-webkit-scrollbar-thumb {
-  background-color: #ddd;
+  background-color: var(--smpchat_color-dark-white);
   border-radius: 20px;
 }
 
 .smpChat__dialog__chatView::-webkit-scrollbar-track {
-  background-color: #eee;
+  background-color: var(--smpchat_color-white-grey);
+}
+
+.smpChat__dialog__dottedLine {
+  border: 6px dotted var(--smpchat_color-dark-pink);
 }
 
 .smpChat__dialog__systemBar {
@@ -384,8 +433,8 @@
 .smpChat__dialog__systemMsg {
   margin: 0;
   font-size: 12px;
-  color: #888;
-  background-color: #f5f5f6;
+  color: var(--smpchat_color-grey);
+  background-color: var(--smpchat_color-light-white);
   border-radius: 15px;
   display: inline;
   padding: 5px 10px;
@@ -435,8 +484,9 @@
   margin-top: 5px;
   font-size: 11px;
   padding: 3px 5px 3px 5px;
-  color: #888;
+  color: var(--smpchat_color-grey);
   cursor: default;
+  overflow: hidden;
 }
 
 .smpChat__dialog__contentContainerLeft {
@@ -444,7 +494,18 @@
   overflow: hidden;
   padding: 5px 10px 5px 10px;
   word-break: break-word;
-  background-color: #f5f5f6;
+  background-color: var(--smpchat_color-light-white);
+  margin-top: 5px;
+  border-radius: 0 15px 15px 15px;
+  display: inline-block;
+}
+
+.smpChat__dialog__imageContentContainerLeft {
+  max-width: 225px;
+  background-color: var(--smpchat_color-light-white);
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
   margin-top: 5px;
   border-radius: 0 15px 15px 15px;
   display: inline-block;
@@ -455,11 +516,22 @@
   overflow: hidden;
   padding: 5px 10px 5px 10px;
   word-break: break-word;
-  background-color: #2196f3;
+  background-color: var(--smpchat_color-navSubBar);
   margin-top: 5px;
   border-radius: 15px 0 15px 15px;
   display: inline-block;
-  color: #fff;
+  color: var(--smpchat_color-white);
+}
+
+.smpChat__dialog__imageContentContainerRight {
+  max-width: 225px;
+  overflow: hidden;
+  padding: 0;
+  background-color: var(--smpchat_color-light-white);
+  margin-top: 5px;
+  height: 100%;
+  border-radius: 15px 0 15px 15px;
+  display: inline-block;
 }
 
 .smpChat__dialog__content {
@@ -476,6 +548,13 @@
 
 .smpChat__dialog__content:link {
   text-decoration: none;
+}
+
+.smpChat__dialog__contentImage {
+  max-width: 200px;
+  max-height: 200px;
+  min-width: 50px;
+  min-height: 50px;
 }
 
 .smpChat__dialog__footer {
@@ -534,12 +613,12 @@
 }
 
 .smpChat__dialog__msgTextArea::-webkit-scrollbar-thumb {
-  background-color: #ddd;
+  background-color: var(--smpchat_color-dark-white);
   border-radius: 20px;
 }
 
 .smpChat__dialog__msgTextArea::-webkit-scrollbar-track {
-  background-color: #eee;
+  background-color: var(--smpchat_color-white-grey);
 }
 
 .smpChat__dialog__sendImg {
