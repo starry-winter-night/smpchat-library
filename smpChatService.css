@@ -249,6 +249,14 @@
   background-color: var(--smpchat_color-white);
   font-family: "Nanum Gothic Coding", monospace;
   cursor: pointer;
+  box-shadow: none;
+  outline: none;
+}
+
+.smpChat__connect__container.effect {
+  outline: 2px groove var(--smpchat_color-dark-white) !important;
+  box-shadow: none !important;
+  background-color: rgba(221, 221, 221, 0.4);
 }
 
 .smpChat__connect__id {

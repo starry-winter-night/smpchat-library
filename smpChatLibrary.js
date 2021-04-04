@@ -113,6 +113,8 @@
               contentsHTML().preview(logs);
             });
 
+            effectSelect(dialog[0].roomName);
+
             clickPreview(socket);
           }
         });
@@ -121,20 +123,33 @@
         socket.on("preview", (info) => {
           contentsHTML().preview(info);
 
-          alarmPreview(info.userId);
+          const currSelect = checkCurrSelectPreview(info.roomName);
+
+          if (!currSelect) alarmPreview(info.roomName);
 
           clickPreview(socket);
         });
+
+        function checkCurrSelectPreview(roomName) {
+          const currDom = document.querySelector(
+            `.smpChat__connect__container_${roomName}`
+          );
+          let result = false;
+
+          if (currDom.classList.contains("effect")) result = true;
+
+          return result;
+        }
       },
       dialog: (userId) => {
         socket.on("dialog", (dialog) => {
           resetHTML().dialog(dialog[0].roomName);
 
-          dialog.forEach((logs) => {
-            contentsHTML().dialog(logs, userId);
-          });
+          dialog.forEach((logs) => contentsHTML().dialog(logs, userId));
 
           scrollBottom(document.querySelector(".smpChat__dialog__chatView"));
+
+          effectSelect(dialog[0].roomName);
         });
       },
       prevDialog: (userId) => {
@@ -774,7 +789,7 @@
     return {
       noticeClient: () => {
         /*  textNode  */
-        const idText = document.createTextNode("smpchat");
+        const idText = document.createTextNode("smpchat_bot");
         const noticeIdSpan = document.createTextNode("[공지사항]");
         const noticeContentText = `안녕하세요! 이용방법을 읽어주세요.
         </br>우측상단 버튼을 클릭시 서버와 연결됩니다. 
@@ -791,11 +806,11 @@
         profile.appendChild(profileImage);
         profile.appendChild(id);
         profile.appendChild(span);
-        profile.appendChild(time);
         container.appendChild(profile);
         content.innerHTML = noticeContentText;
         span.appendChild(noticeIdSpan);
         contentsContainer.appendChild(content);
+        container.appendChild(time);
         container.appendChild(contentsContainer);
         dialog.appendChild(container);
 
@@ -829,9 +844,9 @@
         profile.appendChild(profileImage);
         profile.appendChild(id);
         profile.appendChild(span);
-        profile.appendChild(time);
         container.appendChild(profile);
         contentsContainer.appendChild(link);
+        container.appendChild(time);
         container.appendChild(contentsContainer);
         dialog.appendChild(container);
 
@@ -858,7 +873,7 @@
       alert: (type) => {
         let noticeContentText = null;
         /*  textNode  */
-        const idText = document.createTextNode("smpchat");
+        const idText = document.createTextNode("smpchat_bot");
         const noticeIdSpan = document.createTextNode("[알림]");
 
         if (type === "duplicate") {
@@ -880,12 +895,12 @@
         profile.appendChild(profileImage);
         profile.appendChild(id);
         profile.appendChild(span);
-        profile.appendChild(time);
         container.appendChild(profile);
         content.innerHTML = noticeContentText;
         span.appendChild(noticeIdSpan);
         contentsContainer.appendChild(content);
         container.appendChild(contentsContainer);
+        container.appendChild(time);
         dialog.appendChild(container);
 
         /*  className & id   */
@@ -954,7 +969,6 @@
           profile.appendChild(id);
           profile.appendChild(span);
           container.appendChild(profile);
-          container.appendChild(time);
 
           if (image !== null) {
             contentsContainer.appendChild(contentImage);
@@ -965,6 +979,7 @@
           content.appendChild(onMessage);
           container.appendChild(contentsContainer);
           container.appendChild(time);
+
           /*  className & id   */
           id.className = "smpChat__dialog__id";
           profile.className = "smpChat__dialog__profile";
@@ -1433,18 +1448,9 @@
     );
 
     const clickPreviewHandler = (e) => {
-      let dom = e.target;
+      const targetDom = eDelegation(e.target, "smpChat__connect__container");
 
-      while (!dom.classList.contains("smpChat__connect__container")) {
-        dom = dom.parentNode;
-
-        if (dom.nodeName === "SECTION") {
-          dom = null;
-          return;
-        }
-      }
-
-      const userId = dom.dataset.id;
+      const userId = targetDom.dataset.id;
 
       containers.forEach((dom) => {
         if (dom.dataset.id === userId) socketSend(socket).dialog(userId);
@@ -1454,6 +1460,19 @@
     list.addEventListener("click", clickPreviewHandler);
 
     return;
+  };
+
+  const eDelegation = function eventDelegation(targetDom, domName) {
+    while (!targetDom.classList.contains(domName)) {
+      targetDom = targetDom.parentNode;
+
+      if (targetDom.nodeName === "SECTION") {
+        targetDom = null;
+        return;
+      }
+    }
+
+    return targetDom;
   };
 
   const dialogScroll = function loadDialogScroll(socket) {
@@ -1595,13 +1614,21 @@
     theme.addEventListener("click", themeClickHandler, false);
   };
 
-  const alarmPreview = function alarmNewPreview(userId) {
+  const alarmPreview = function alarmNewPreview(roomName) {
+    const container = document.querySelector(
+      `.smpChat__connect__container_${roomName}`
+    );
+    const list = document.querySelector(".smpChat__connect__list");
     let previewRaf = null;
     let opacity = 0;
     let startTime = 0;
     let opacitySwitch = true;
 
-    const effectPreview = (timestamp) => {
+    previewRaf = requestAnimationFrame(effectAlarmPreview);
+
+    list.addEventListener("click", stopAlarmPreview, false);
+
+    function effectAlarmPreview(timestamp) {
       let interval = 0;
 
       if (startTime === 0) startTime = timestamp;
@@ -1617,43 +1644,49 @@
 
         opacity = Number(opacity.toFixed(1));
 
-        applyPreviewEffect();
+        applyPreviewColor();
 
         startTime = timestamp;
       }
 
-      previewRaf = requestAnimationFrame(effectPreview);
-    };
+      previewRaf = requestAnimationFrame(effectAlarmPreview);
+    }
 
-    const getRootColorRGB = () => {
+    function applyPreviewColor() {
+      container.style.outline = `3px groove ${getRootColorRGB()}, ${opacity})`;
+      container.style.boxShadow = `inset 0 2px 45px ${getRootColorRGB()}, ${opacity})`;
+    }
+
+    function getRootColorRGB() {
       const domStyle = getComputedStyle(document.documentElement);
       const color = domStyle.getPropertyValue("--smpchat_color_navSubBarRGB");
 
       return color.substring(0, color.length - 1);
-    };
+    }
 
-    const container = document.querySelector(
-      `.smpChat__connect__container_${userId}`
-    );
-    const rgbColor = getRootColorRGB();
+    function stopAlarmPreview(e) {
+      const targetDom = eDelegation(e.target, "smpChat__connect__container");
 
-    const applyPreviewEffect = () => {
-      container.style.outline = `3px groove ${rgbColor}, ${opacity})`;
-      container.style.boxShadow = `inset 0 2px 45px ${rgbColor}, ${opacity})`;
-    };
+      if (targetDom === container) {
+        container.style.outline = "none";
+        container.style.boxShadow = "none";
 
-    // const clearPreviewEffect = (e) => {
-    //   container.style.outline = "2px groove var(--smpchat_color-navSubBar)";
-    //   container.style.boxShadow = "none";
-    //   container.style.backgroundColor = `${rgbColor}, 0.2`;
-    // };
-
-    previewRaf = requestAnimationFrame(effectPreview);
-
-    if (container) {
-      container.addEventListener("click", () => {
         cancelAnimationFrame(previewRaf);
-      });
+      }
+    }
+  };
+
+  const effectSelect = function effectPreviewSelect(roomName) {
+    if (roomName) {
+      const list = document.querySelectorAll(".smpChat__connect__container");
+
+      list.forEach((dom) => dom.classList.remove("effect"));
+
+      const clickedDom = document.querySelector(
+        `.smpChat__connect__container_${roomName}`
+      );
+
+      clickedDom.classList.add("effect");
     }
   };
 
