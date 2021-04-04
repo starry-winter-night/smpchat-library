@@ -121,6 +121,8 @@
         socket.on("preview", (info) => {
           contentsHTML().preview(info);
 
+          alarmPreview(info.userId);
+
           clickPreview(socket);
         });
       },
@@ -953,11 +955,13 @@
           profile.appendChild(span);
           container.appendChild(profile);
           container.appendChild(time);
+
           if (image !== null) {
             contentsContainer.appendChild(contentImage);
           } else {
             contentsContainer.appendChild(content);
           }
+
           content.appendChild(onMessage);
           container.appendChild(contentsContainer);
           container.appendChild(time);
@@ -970,7 +974,15 @@
             image !== null
               ? "smpChat__dialog__imageContentContainerLeft"
               : "smpChat__dialog__contentContainerLeft";
-        } else {
+
+          /*  set  */
+          profileImage.src =
+            msg.userType === "manager"
+              ? "http://localhost:5000/smpChat/image?name=smpark.jpg"
+              : "http://localhost:5000/smpChat/image?name=발리.jpg";
+        }
+
+        if (userId === currUserId) {
           /*  appned  */
           container.appendChild(time);
           if (image !== null) {
@@ -999,7 +1011,6 @@
         /*  set  */
         time.setAttribute("datetime", registerTime);
         container.dataset.seq = seq;
-        profileImage.src = "http://localhost:5000/smpChat/image?name=발리.jpg";
 
         if (image !== null) {
           contentImage.src = `data:image/jpeg;base64,${image}`;
@@ -1416,23 +1427,28 @@
   };
 
   const clickPreview = function joinChatRoom(socket) {
-    const list = document.querySelector(`.smpChat__connect__list`);
+    const list = document.querySelector(".smpChat__connect__list");
+    const containers = document.querySelectorAll(
+      ".smpChat__connect__container"
+    );
 
     const clickPreviewHandler = (e) => {
-      let elem = e.target;
+      let dom = e.target;
 
-      while (!elem.classList.contains("smpChat__connect__container")) {
-        elem = elem.parentNode;
+      while (!dom.classList.contains("smpChat__connect__container")) {
+        dom = dom.parentNode;
 
-        if (elem.nodeName === "BODY") {
-          elem = null;
+        if (dom.nodeName === "SECTION") {
+          dom = null;
           return;
         }
       }
 
-      const userId = elem.dataset.id;
+      const userId = dom.dataset.id;
 
-      socketSend(socket).dialog(userId);
+      containers.forEach((dom) => {
+        if (dom.dataset.id === userId) socketSend(socket).dialog(userId);
+      });
     };
 
     list.addEventListener("click", clickPreviewHandler);
@@ -1538,13 +1554,13 @@
     const theme = document.querySelector(".smpChat__section__theme");
     const send = document.querySelector(".smpChat__dialog__sendImg");
 
-    document.documentElement.setAttribute("user-theme", "blue");
+    document.documentElement.setAttribute("smpchat-user-theme", "blue");
 
-    localStorage.setItem("user-theme", "blue");
+    localStorage.setItem("smpchat-user-theme", "blue");
 
     const themeClickHandler = (e) => {
-      if (localStorage.getItem("user-theme") === "blue") {
-        document.documentElement.setAttribute("user-theme", "red");
+      if (localStorage.getItem("smpchat-user-theme") === "blue") {
+        document.documentElement.setAttribute("smpchat-user-theme", "red");
 
         theme.setAttribute(
           "src",
@@ -1555,12 +1571,12 @@
           "http://localhost:5000/smpChat/image?name=redSend.png"
         );
 
-        localStorage.setItem("user-theme", "red");
+        localStorage.setItem("smpchat-user-theme", "red");
         return;
       }
 
-      if (localStorage.getItem("user-theme") === "red") {
-        document.documentElement.setAttribute("user-theme", "blue");
+      if (localStorage.getItem("smpchat-user-theme") === "red") {
+        document.documentElement.setAttribute("smpchat-user-theme", "blue");
 
         theme.setAttribute(
           "src",
@@ -1571,12 +1587,74 @@
           "http://localhost:5000/smpChat/image?name=blueSend.png"
         );
 
-        localStorage.setItem("user-theme", "blue");
+        localStorage.setItem("smpchat-user-theme", "blue");
         return;
       }
     };
 
     theme.addEventListener("click", themeClickHandler, false);
+  };
+
+  const alarmPreview = function alarmNewPreview(userId) {
+    let previewRaf = null;
+    let opacity = 0;
+    let startTime = 0;
+    let opacitySwitch = true;
+
+    const effectPreview = (timestamp) => {
+      let interval = 0;
+
+      if (startTime === 0) startTime = timestamp;
+
+      interval = (timestamp - startTime) / 10;
+
+      if (interval > 10) {
+        opacity = opacitySwitch ? opacity + 0.1 : opacity - 0.1;
+
+        if (opacity === 1) opacitySwitch = false;
+
+        if (opacity === 0) opacitySwitch = true;
+
+        opacity = Number(opacity.toFixed(1));
+
+        applyPreviewEffect();
+
+        startTime = timestamp;
+      }
+
+      previewRaf = requestAnimationFrame(effectPreview);
+    };
+
+    const getRootColorRGB = () => {
+      const domStyle = getComputedStyle(document.documentElement);
+      const color = domStyle.getPropertyValue("--smpchat_color_navSubBarRGB");
+
+      return color.substring(0, color.length - 1);
+    };
+
+    const container = document.querySelector(
+      `.smpChat__connect__container_${userId}`
+    );
+    const rgbColor = getRootColorRGB();
+
+    const applyPreviewEffect = () => {
+      container.style.outline = `3px groove ${rgbColor}, ${opacity})`;
+      container.style.boxShadow = `inset 0 2px 45px ${rgbColor}, ${opacity})`;
+    };
+
+    // const clearPreviewEffect = (e) => {
+    //   container.style.outline = "2px groove var(--smpchat_color-navSubBar)";
+    //   container.style.boxShadow = "none";
+    //   container.style.backgroundColor = `${rgbColor}, 0.2`;
+    // };
+
+    previewRaf = requestAnimationFrame(effectPreview);
+
+    if (container) {
+      container.addEventListener("click", () => {
+        cancelAnimationFrame(previewRaf);
+      });
+    }
   };
 
   class SmpChatError extends Error {
