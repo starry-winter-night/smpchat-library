@@ -105,10 +105,10 @@
 }
 
 .smpChat__section__theme {
-  max-width: 50px;
-  max-height: 50px;
-  width: 50px;
-  height: 50px;
+  max-width: 25px;
+  max-height: 25px;
+  width: 25px;
+  height: 25px;
   cursor: pointer;
 }
 
@@ -253,7 +253,7 @@
   outline: none;
 }
 
-.smpChat__connect__container.effect {
+.smpChat__connect__container.select {
   outline: 2px groove var(--smpchat_color-dark-white) !important;
   box-shadow: none !important;
   background-color: rgba(221, 221, 221, 0.4);
@@ -500,8 +500,15 @@
   overflow: hidden;
 }
 
+.smpChat__dialog__observe {
+  max-width: 15px;
+  max-height: 15px;
+  vertical-align: inherit;
+  padding-bottom: 5px;
+}
+
 .smpChat__dialog__contentContainerLeft {
-  max-width: 225px;
+  max-width: 210px;
   overflow: hidden;
   padding: 5px 10px 5px 10px;
   word-break: break-word;
@@ -512,7 +519,7 @@
 }
 
 .smpChat__dialog__imageContentContainerLeft {
-  max-width: 225px;
+  max-width: 210px;
   background-color: var(--smpchat_color-light-white);
   padding: 0;
   height: 100%;
@@ -523,7 +530,7 @@
 }
 
 .smpChat__dialog__contentContainerRight {
-  max-width: 225px;
+  max-width: 210px;
   overflow: hidden;
   padding: 5px 10px 5px 10px;
   word-break: break-word;
@@ -535,7 +542,7 @@
 }
 
 .smpChat__dialog__imageContentContainerRight {
-  max-width: 225px;
+  max-width: 210px;
   overflow: hidden;
   padding: 0;
   background-color: var(--smpchat_color-light-white);
