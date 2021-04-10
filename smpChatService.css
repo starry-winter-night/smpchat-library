@@ -10,6 +10,7 @@
   --smpchat_color-white-grey: #eeeeee;
   --smpchat_color_navSubBarRGB: rgba(33, 150, 243);
   --smpchat_color-navSubBar: #2196f3;
+  --smpchat_color-light-red: #ff0084;
   --smpchat_color-navBar: #0069c0;
   --smpchat_color-light-yellow: #fff7d1;
   --smpchat_color-orange: #f35f2c;
@@ -53,13 +54,25 @@
   cursor: pointer;
   z-index: 99999;
 }
-
 .smpChat__message__alarm {
+  display: none;
+}
+.smpChat__message__alarm.view {
+  display: block;
   position: fixed;
   bottom: 100px;
   right: 5%;
   z-index: 99999;
   margin: 0;
+  min-height: 15px;
+  min-width: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  border-radius: 50%;
+  padding: 1px 5px;
+  color: var(--smpchat_color-light-white);
+  background-color: var(--smpchat_color-light-red);
 }
 
 .smpChat__section {
@@ -295,12 +308,35 @@
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   overflow: hidden;
+  width: 80%;
 }
 
 .smpChat__connect__contentsContainer {
   height: 40px;
   padding: 0 10px;
   width: 100%;
+  position: relative;
+}
+
+.smpChat__connect_previewAlarm {
+  display: none;
+}
+.smpChat__connect_previewAlarm.view {
+  display: block;
+  min-height: 15px;
+  min-width: 20px;
+  position: absolute;
+  right: 3%;
+  bottom: 13px;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  overflow: hidden;
+  text-align: center;
+  border-radius: 50%;
+  padding: 1px 5px;
+  color: var(--smpchat_color-light-white);
+  background-color: var(--smpchat_color-light-red);
 }
 
 /* dialog */
