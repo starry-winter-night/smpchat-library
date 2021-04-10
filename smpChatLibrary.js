@@ -31,12 +31,13 @@
               ? managerArea(this.args, data.state)
               : clientArea(this.args, data.state);
 
-            /* 서버에서 인증여부 가져와서 false면 
-               입력창 하나 만들고 
-               거기에 직접 api키를 넣게 만들어서
-               서버에 던지고 맞으면 인증ok 
-               레퍼러 검사해서 같은 레퍼러면 계속 통과
-               다른 레퍼러에서 넘어오면 다시 인증
+            /*
+              서버에서 인증여부 가져와서 false면 
+              입력창 하나 만들고 
+              거기에 직접 api키를 넣게 만들어서
+              서버에 던지고 맞으면 인증ok 
+              레퍼러 검사해서 같은 레퍼러면 계속 통과
+              다른 레퍼러에서 넘어오면 다시 인증
             */
             const socket = await socketURL(this.args);
 
@@ -62,7 +63,7 @@
 
             socketReceive(socket).start(userId, data.type);
 
-            socketReceive(socket).preview();
+            socketReceive(socket).preview(userId);
 
             socketReceive(socket).dialog(userId);
 
@@ -85,7 +86,6 @@
     return {
       connect: () => {
         socket.on("connect", () => {
-          // socket.sendBuffer = [];
           console.log("server connect!!");
         });
       },
@@ -105,9 +105,13 @@
           resetHTML().dialog();
 
           if (dialog.length !== 0) {
-            dialog.forEach((logs) => contentsHTML().dialog(logs, userId));
+            dialog.forEach((logs) => {
+              contentsHTML().dialog(logs, userId);
 
-            observeChatView(socket, dialog[0].roomName);
+              if (!logs.observe && logs.userId !== userId) {
+                observeChatView(socket, dialog[0].roomName);
+              }
+            });
           }
 
           if (previewLog) {
@@ -116,9 +120,13 @@
             previewLog.forEach((logs) => {
               contentsHTML().preview(logs);
 
-              const drawNumber = checkPreview.draw(logs.roomName);
+              const drawPreviewCount = onceDraw.preview(logs.roomName);
 
-              if (drawNumber === 1) clickPreview(socket, logs.roomName);
+              if (drawPreviewCount === 1) clickPreview(socket, logs.roomName);
+
+              const drawAlarmCount = onceDraw.alarm(logs.roomName);
+
+              if (drawAlarmCount === 1) drawAlarm.icon();
             });
 
             if (dialog.length !== 0 && type === "manager") {
@@ -127,17 +135,23 @@
           }
         });
       },
-      preview: () => {
+      preview: (userId) => {
         socket.on("preview", (info) => {
           contentsHTML().preview(info);
 
-          const result = checkPreview.selectAndEffect(info.roomName);
+          const result = checkSelectEffect(info.roomName);
 
           if (!result.select && !result.effect) alarmPreview(info.roomName);
 
-          const drawNumber = checkPreview.draw(info.roomName);
+          const drawPreviewCount = onceDraw.preview(info.roomName);
 
-          if (drawNumber === 1) clickPreview(socket, info.roomName);
+          if (drawPreviewCount === 1) clickPreview(socket, info.roomName);
+
+          const alarm = countAlarm(info, userId);
+
+          drawAlarm.preview(alarm.previewCount, info.roomName);
+
+          drawAlarm.icon(alarm.iconCount);
         });
       },
       dialog: (userId) => {
@@ -172,8 +186,7 @@
 
           scrollBottom(document.querySelector(".smpChat__dialog__chatView"));
 
-          // 메세지 보낸이와 내 아이디가 다른 경우 즉, 상대가 보낸 메세지일때만
-          if (message.userId !== userId) {      
+          if (message.userId !== userId) {
             observeChatView(socket, message.roomName);
           }
         });
@@ -188,10 +201,12 @@
       alarm: () => {
         socket.on("alarm", (msgCounts) => {
           let count = 0;
-
+          console.log(msgCounts);
           for (userId in msgCounts) count = count + msgCounts[userId];
 
-          document.querySelector(".smpChat__message__alarm").innerHTML = count;
+          document.querySelector(
+            ".smpChat__message__alarm"
+          ).textContent = count;
         });
       },
       disconnect: () => {
@@ -208,38 +223,19 @@
     };
   };
 
-  const checkPreview = (() => {
-    let drawPreview = {};
+  const checkSelectEffect = function checkSelectAndEffectPreview(roomName) {
+    const currDom = document.querySelector(
+      `.smpChat__connect__container_${roomName}`
+    );
 
-    return {
-      selectAndEffect: (roomName) => {
-        const currDom = document.querySelector(
-          `.smpChat__connect__container_${roomName}`
-        );
+    let select = false;
+    let effect = false;
 
-        let select = false;
-        let effect = false;
+    if (currDom.classList.contains("select")) select = true;
+    if (currDom.classList.contains("effect")) effect = true;
 
-        if (currDom.classList.contains("select")) select = true;
-        if (currDom.classList.contains("effect")) effect = true;
-
-        return { select, effect };
-      },
-      draw: (roomName) => {
-        const currDom = document.querySelector(
-          `.smpChat__connect__container_${roomName}`
-        );
-
-        if (!drawPreview[roomName]) drawPreview[roomName] = 0;
-
-        if (!currDom) return 0;
-
-        if (currDom) drawPreview[roomName] = drawPreview[roomName] + 1;
-
-        return drawPreview[roomName];
-      },
-    };
-  })();
+    return { select, effect };
+  };
 
   const socketSend = function sendSocketArea(socket) {
     return {
@@ -661,6 +657,7 @@
     const theme = document.createElement("img");
     const closeImg = document.createElement("img");
     const dialog = document.createElement("div");
+    const alarm = document.createElement("p");
     const smpChatIconImg = document.createElement("img");
 
     /* dialog */
@@ -728,6 +725,7 @@
     /* smpchat */
 
     smpChatLayout.appendChild(smpChatIconImg);
+    smpChatLayout.appendChild(alarm);
     smpChatLayout.appendChild(section);
 
     /*****************************  className & id  *****************************/
@@ -735,6 +733,7 @@
     section.id = "smpChat_clientSection";
     section.className = "smpChat__section";
     contents.className = "smpChat__section__contents";
+    alarm.className = "smpChat__message__alarm";
     navbar.className = "smpChat__section__navbar";
     dialog.className =
       "smpChat__section__dialog smpChat__section__clientDialog";
@@ -1027,14 +1026,6 @@
           profile.appendChild(span);
           container.appendChild(profile);
 
-          // if (!msg.observe && msg.userType === "client") {
-          //   const alarm = document.querySelector(".smpChat__message__alarm");
-
-          //   const count = msgAlarmCount(false, userId);
-          //   console.log("증가", count);
-          //   alarm.innerHTML = count;
-          // }
-
           if (image !== null) {
             contentsContainer.appendChild(contentImage);
           } else {
@@ -1257,6 +1248,7 @@
           /* layout */
           const container = document.createElement("div");
           const id = document.createElement("p");
+          const previewAlarm = document.createElement("p");
 
           /*  textNode  */
           const idText = document.createTextNode(roomName);
@@ -1268,7 +1260,7 @@
           container.appendChild(id);
           container.appendChild(time);
           contentsContainer.appendChild(content);
-          contentsContainer.appendChild(contentImage);
+          contentsContainer.appendChild(previewAlarm);
           container.appendChild(contentsContainer);
           connect.appendChild(container);
 
@@ -1278,6 +1270,7 @@
           time.className = `smpChat__connect__time smpChat__connect__time_${roomName}`;
           content.className = `smpChat__connect__content smpChat__connect__content_${roomName}`;
           container.className = `smpChat__connect__container smpChat__connect__container_${roomName}`;
+          previewAlarm.className = `smpChat__connect_previewAlarm smpChat__connect_previewAlarm_${roomName}`;
           contentsContainer.className = "smpChat__connect__contentsContainer";
 
           /*  set  */
@@ -1525,7 +1518,14 @@
       `.smpChat__connect__container_${roomName}`
     );
 
-    list.addEventListener("click", () => socketSend(socket).dialog(roomName));
+    list.addEventListener(
+      "click",
+      () => {
+        socketSend(socket).dialog(roomName);
+        socketSend(socket).observe(roomName);
+      },
+      false
+    );
     return;
   };
 
@@ -1767,7 +1767,10 @@
       const observer = new IntersectionObserver((entries, options) => {
         const active = icon.classList.contains("smp_active");
 
-        if (active) socketSend(socket).observe(roomName);
+        if (active) {
+          // 메시지 보낸 쪽이랑 현재 아이디랑 다를때 들어가야됨.
+          socketSend(socket).observe(roomName);
+        }
 
         return;
       });
@@ -1804,6 +1807,106 @@
       }
     });
   };
+
+  const countAlarm = (function countPreviewAlarm() {
+    let previewCount = {};
+    let iconCount = 0;
+
+    return (msg, userId) => {
+      const chatView = document.querySelector(
+        `.smpChat__dialog__chatView_${msg.roomName}`
+      );
+
+      if (chatView === null && msg.userId !== userId) {
+        if (!previewCount[msg.userId]) previewCount[msg.userId] = 0;
+
+        previewCount[msg.userId] = previewCount[msg.userId] + 1;
+
+        iconCount = iconCount + 1;
+        return { previewCount, iconCount };
+      }
+    };
+  })();
+
+  const onceDraw = (function checkOnceDraw() {
+    let checkPreview = {};
+    let checkAlarm = 0;
+
+    return {
+      preview: (roomName) => {
+        const currDom = document.querySelector(
+          `.smpChat__connect__container_${roomName}`
+        );
+
+        if (!checkPreview[roomName]) checkPreview[roomName] = 0;
+
+        if (!currDom) return 0;
+
+        if (currDom) checkPreview[roomName] = checkPreview[roomName] + 1;
+
+        return checkPreview[roomName];
+      },
+      alarm: (roomName) => {
+        const currDom = document.querySelector(
+          `.smpChat__connect__container_${roomName}`
+        );
+
+        if (!currDom) return 0;
+
+        if (currDom) checkAlarm = checkAlarm + 1;
+
+        return checkAlarm;
+      },
+    };
+  })();
+
+  const drawAlarm = (function drawMessageAlarm() {
+    return {
+      preview: (count, roomName) => {
+        const previewAlarm = document.querySelector(
+          `.smpChat__connect_previewAlarm_${roomName}`
+        );
+
+        if (previewAlarm && typeof count === "object") {
+          previewAlarm.classList.add("view");
+
+          for (id in count) {
+            if (id === roomName) {
+              previewAlarm.textContent = count[id];
+            }
+          }
+        }
+      },
+      icon: (count) => {
+        const iconAlarm = document.querySelector(".smpChat__message__alarm");
+
+        if (iconAlarm && typeof count === "number") {
+          iconAlarm.classList.add("view");
+
+          iconAlarm.textContent = count;
+        }
+
+        // const close = document.querySelector(".smpChat__section__close");
+        // const iconAlarm = document.querySelector(".smpChat__message__alarm");
+        // close.addEventListener("click", drawIconAlarm, false);
+        // function drawIconAlarm(e) {
+        //   const icon = document.querySelector(".smpChatIcon");
+        //   const check = icon.classList.contains("smp_active");
+        //   if (!check) {
+        //     const alarms = document.querySelectorAll(
+        //       ".smpChat__connect_previewAlarm"
+        //     );
+        //     const arrAlarm = [...alarms];
+        //     let alramCount = 0;
+        //     arrAlarm.forEach((dom) => {
+        //       alramCount = alramCount + parseInt(dom.textContent);
+        //     });
+        //     iconAlarm.textContent = alramCount;
+        //   }
+        // }
+      },
+    };
+  })();
 
   class SmpChatError extends Error {
     constructor(message) {
