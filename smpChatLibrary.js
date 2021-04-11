@@ -100,18 +100,24 @@
       },
       start: (userId, type) => {
         socket.on("start", (info) => {
-          const { dialog, previewLog } = info;
+          const { dialog, previewLog, alarmCount } = info;
 
           resetHTML().dialog();
 
           if (dialog.length !== 0) {
+            let count = 0;
+
             dialog.forEach((logs) => {
               contentsHTML().dialog(logs, userId);
 
               if (!logs.observe && logs.userId !== userId) {
+                count = count + 1;
+
                 observeChatView(socket, dialog[0].roomName);
               }
             });
+
+            drawAlarm.icon(count);
           }
 
           if (previewLog) {
@@ -124,15 +130,17 @@
 
               if (drawPreviewCount === 1) clickPreview(socket, logs.roomName);
 
-              const drawAlarmCount = onceDraw.alarm(logs.roomName);
+              drawAlarm.refleshPreview(alarmCount.previewCount, logs.roomName);
 
-              if (drawAlarmCount === 1) drawAlarm.icon();
+              drawAlarm.icon(alarmCount.iconCount);
             });
 
             if (dialog.length !== 0 && type === "manager") {
               effectSelect(dialog[0].roomName);
             }
           }
+
+          drawAlarm.clickCloseReDraw();
         });
       },
       preview: (userId) => {
@@ -147,11 +155,14 @@
 
           if (drawPreviewCount === 1) clickPreview(socket, info.roomName);
 
-          const alarm = countAlarm(info, userId);
+          drawAlarm.messagePreview(info.alarm, info.roomName);
 
-          drawAlarm.preview(alarm.previewCount, info.roomName);
+          countIconAlarm(info, userId);
 
-          drawAlarm.icon(alarm.iconCount);
+          if (onceDraw.alarm(info.roomName) === 1) {
+            drawAlarm.clickIconHide();
+            drawAlarm.clickCloseReDraw();
+          }
         });
       },
       dialog: (userId) => {
@@ -187,6 +198,10 @@
           scrollBottom(document.querySelector(".smpChat__dialog__chatView"));
 
           if (message.userId !== userId) {
+            drawAlarm.icon(message.alarm);
+
+            drawAlarm.clickCloseReDraw();
+
             observeChatView(socket, message.roomName);
           }
         });
@@ -1006,14 +1021,6 @@
       dialog: (msg, currUserId) => {
         const { seq, userId, message, registerTime, roomName, image } = msg;
 
-        const chatView = document.querySelector(
-          `.smpChat__dialog__chatView_${currUserId}`
-        );
-
-        if (!chatView) {
-          dialog.classList.add(`smpChat__dialog__chatView_${roomName}`);
-        }
-
         /*  textNode  */
         const onMessage = document.createTextNode(message);
         const idText = document.createTextNode(userId);
@@ -1041,6 +1048,7 @@
           id.className = "smpChat__dialog__id";
           profile.className = "smpChat__dialog__profile";
           profileImage.className = "smpChat__dialog__profileImage";
+          dialog.className = `smpChat__dialog__chatView smpChat__dialog__chatView_${roomName}`;
           container.className = "smpChat__dialog__containerLeft";
           contentsContainer.className =
             image !== null
@@ -1517,10 +1525,16 @@
     const list = document.querySelector(
       `.smpChat__connect__container_${roomName}`
     );
+    const alarm = document.querySelector(
+      `.smpChat__connect_previewAlarm_${roomName}`
+    );
 
     list.addEventListener(
       "click",
       () => {
+        alarm.classList.remove("view");
+        alarm.textContent = 0;
+
         socketSend(socket).dialog(roomName);
         socketSend(socket).observe(roomName);
       },
@@ -1767,10 +1781,7 @@
       const observer = new IntersectionObserver((entries, options) => {
         const active = icon.classList.contains("smp_active");
 
-        if (active) {
-          // 메시지 보낸 쪽이랑 현재 아이디랑 다를때 들어가야됨.
-          socketSend(socket).observe(roomName);
-        }
+        if (active) socketSend(socket).observe(roomName);
 
         return;
       });
@@ -1808,25 +1819,40 @@
     });
   };
 
-  const countAlarm = (function countPreviewAlarm() {
-    let previewCount = {};
-    let iconCount = 0;
+  const countIconAlarm = function countMessageIconAlarm() {
+    const iconAlarm = document.querySelector(".smpChat__message__alarm");
+    const alarms = document.querySelectorAll(".smpChat__connect_previewAlarm");
+    const arrAlarm = [...alarms];
 
-    return (msg, userId) => {
-      const chatView = document.querySelector(
-        `.smpChat__dialog__chatView_${msg.roomName}`
-      );
+    let alramCount = 0;
 
-      if (chatView === null && msg.userId !== userId) {
-        if (!previewCount[msg.userId]) previewCount[msg.userId] = 0;
+    arrAlarm.forEach((dom) => {
+      if (dom.textContent) {
+        const alarm = parseInt(dom.textContent);
 
-        previewCount[msg.userId] = previewCount[msg.userId] + 1;
-
-        iconCount = iconCount + 1;
-        return { previewCount, iconCount };
+        if (typeof alarm === "number") {
+          alramCount = alramCount + alarm;
+        }
       }
-    };
-  })();
+    });
+
+    if (alramCount === 0) iconAlarm.classList.remove("view");
+
+    if (alramCount > 0) {
+      if (iconAlarm.classList.contains("view")) {
+        iconAlarm.textContent = alramCount;
+
+        return;
+      }
+
+      if (!iconAlarm.classList.contains("view")) {
+        iconAlarm.classList.add("view");
+        iconAlarm.textContent = alramCount;
+
+        return;
+      }
+    }
+  };
 
   const onceDraw = (function checkOnceDraw() {
     let checkPreview = {};
@@ -1860,18 +1886,37 @@
     };
   })();
 
-  const drawAlarm = (function drawMessageAlarm() {
+  const drawAlarm = (function drawChatAlarm() {
     return {
-      preview: (count, roomName) => {
+      messagePreview: (count, roomName) => {
         const previewAlarm = document.querySelector(
           `.smpChat__connect_previewAlarm_${roomName}`
         );
+        const chatView = document.querySelector(
+          `.smpChat__dialog__chatView_${roomName}`
+        );
+        const section = document.querySelector(".smpChat__section");
 
-        if (previewAlarm && typeof count === "object") {
+        if (typeof count === "number" && count > 0) {
+          if (chatView && section.classList.contains("smp_active")) return;
+
           previewAlarm.classList.add("view");
 
+          previewAlarm.textContent = count;
+        }
+      },
+      refleshPreview: (count, roomName) => {
+        const previewAlarm = document.querySelector(
+          `.smpChat__connect_previewAlarm_${roomName}`
+        );
+        const chatView = document.querySelector(
+          `.smpChat__dialog__chatView_${roomName}`
+        );
+
+        if (typeof count === "object" && !chatView) {
           for (id in count) {
-            if (id === roomName) {
+            if (id === roomName && count[id] > 0) {
+              previewAlarm.classList.add("view");
               previewAlarm.textContent = count[id];
             }
           }
@@ -1880,30 +1925,76 @@
       icon: (count) => {
         const iconAlarm = document.querySelector(".smpChat__message__alarm");
 
-        if (iconAlarm && typeof count === "number") {
+        if (iconAlarm && typeof count === "number" && count > 0) {
           iconAlarm.classList.add("view");
 
           iconAlarm.textContent = count;
         }
+      },
+      clickIconHide: () => {
+        const icon = document.querySelector(".smpChatIcon");
 
-        // const close = document.querySelector(".smpChat__section__close");
-        // const iconAlarm = document.querySelector(".smpChat__message__alarm");
-        // close.addEventListener("click", drawIconAlarm, false);
-        // function drawIconAlarm(e) {
-        //   const icon = document.querySelector(".smpChatIcon");
-        //   const check = icon.classList.contains("smp_active");
-        //   if (!check) {
-        //     const alarms = document.querySelectorAll(
-        //       ".smpChat__connect_previewAlarm"
-        //     );
-        //     const arrAlarm = [...alarms];
-        //     let alramCount = 0;
-        //     arrAlarm.forEach((dom) => {
-        //       alramCount = alramCount + parseInt(dom.textContent);
-        //     });
-        //     iconAlarm.textContent = alramCount;
-        //   }
-        // }
+        icon.addEventListener("click", iconEventHandler, false);
+
+        function iconEventHandler() {
+          let container = document.querySelectorAll(
+            ".smpChat__connect__container"
+          );
+
+          container = [...container];
+
+          container.map((dom) => {
+            if (dom.classList.contains("select")) {
+              const id = dom.dataset.id;
+              const alarm = document.querySelector(
+                `.smpChat__connect_previewAlarm_${id}`
+              );
+
+              alarm.textContent = 0;
+              alarm.classList.remove("view");
+            }
+          });
+        }
+      },
+      clickCloseReDraw: () => {
+        const close = document.querySelector(".smpChat__section__close");
+        const iconAlarm = document.querySelector(".smpChat__message__alarm");
+
+        close.addEventListener("click", closeEventHandler, false);
+
+        function closeEventHandler() {
+          let count = 0;
+          let previewAlarm = document.querySelectorAll(
+            ".smpChat__connect_previewAlarm"
+          );
+
+          if (!previewAlarm) {
+            iconAlarm.textContent = 0;
+            iconAlarm.classList.remove("view");
+
+            return;
+          }
+
+          if (previewAlarm) {
+            previewAlarm = [...previewAlarm];
+
+            previewAlarm.map((dom) => {
+              if (dom.textContent) {
+                const alarmCount = parseInt(dom.textContent);
+
+                if (typeof alarmCount === "number" && alarmCount > 0) {
+                  count = count + alarmCount;
+                }
+              }
+            });
+
+            count > 0
+              ? (iconAlarm.textContent = count)
+              : iconAlarm.classList.remove("view");
+
+            return;
+          }
+        }
       },
     };
   })();
