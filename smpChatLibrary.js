@@ -129,6 +129,11 @@
           previewLog.forEach((logs) => {
             contentsHTML.drawPreview(logs);
 
+            const result = checkEffectPreview(logs.roomName);
+
+            if (!result.select && !result.effect && !logs.observe) {
+              alarmPreview(logs.roomName);
+            }
             const drawPreviewCount = onceDraw.preview(logs.roomName);
 
             if (drawPreviewCount === 1) clickPreview(socket, logs.roomName);
@@ -147,10 +152,12 @@
       });
     }
     function preview(userId) {
-      socket.on("preview", (info) => {
+      socket.on("preview", (info, previewType) => {
+        if (previewType === "Delete") return deletePreview(info);
+
         contentsHTML.drawPreview(info);
 
-        const result = checkPreviewSelectAndEffect(info.roomName);
+        const result = checkEffectPreview(info.roomName);
 
         if (!result.select && !result.effect) alarmPreview(info.roomName);
 
@@ -167,20 +174,6 @@
           drawAlarm.clickCloseReDraw();
         }
       });
-
-      function checkPreviewSelectAndEffect(roomName) {
-        const currPreview = document.querySelector(
-          `.smpChat__connect__container_${roomName}`
-        );
-
-        let select = false;
-        let effect = false;
-
-        if (currPreview.classList.contains("select")) select = true;
-        if (currPreview.classList.contains("effect")) effect = true;
-
-        return { select, effect };
-      }
 
       function countMessageIconAlarm() {
         const iconAlarm = document.querySelector(".smpChat__message__alarm");
@@ -225,6 +218,13 @@
 
           return;
         }
+      }
+
+      function deletePreview(rooName) {
+        const chatView = document.querySelector(
+          `.smpChat__connect__container_${rooName}`
+        );
+        chatView.remove();
       }
     }
     function dialog(userId) {
@@ -1628,7 +1628,6 @@
   };
 
   const clickPreview = function clickPreviewJoinRoom(socket, roomName) {
-    const list = document.querySelector(".smpChat__connect__list");
     const container = document.querySelector(
       `.smpChat__connect__container_${roomName}`
     );
@@ -1906,7 +1905,7 @@
 
     clickedDom.classList.remove("effect");
     clickedDom.classList.add("select");
-    
+
     list.insertBefore(clickedDom, list.firstChild);
   };
 
@@ -1960,6 +1959,19 @@
         return;
       }
     });
+  };
+
+  const checkEffectPreview = function checkPreviewSelectAndEffect(roomName) {
+    const currPreview = document.querySelector(
+      `.smpChat__connect__container_${roomName}`
+    );
+    let select = false;
+    let effect = false;
+
+    if (currPreview.classList.contains("select")) select = true;
+    if (currPreview.classList.contains("effect")) effect = true;
+
+    return { select, effect };
   };
 
   const onceDraw = (function checkOnceDraw() {
