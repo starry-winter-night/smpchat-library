@@ -142,12 +142,9 @@
             if (!result.select && !result.effect && !logs.observe) {
               alarmPreview(logs.roomName);
             }
-            const drawPreviewCount = onceDraw.preview(logs.roomName);
 
-            if (drawPreviewCount === 1) {
-              joinPreview(socket, logs.roomName);
-              leavePreview(socket, logs.roomName);
-            }
+            joinPreview(socket, logs.roomName);
+            leavePreview(socket, logs.roomName);
 
             if (alarmCount) {
               drawAlarm.refleshPreview(alarmCount.previewCount, logs.roomName);
@@ -174,23 +171,21 @@
 
         const result = checkEffectPreview(info.roomName);
 
-        if (!result.select && !result.effect) alarmPreview(info.roomName);
-
-        const drawPreviewCount = onceDraw.preview(info.roomName);
-
-        if (drawPreviewCount === 1) {
-          joinPreview(socket, info.roomName);
-          leavePreview(socket, info.roomName);
+        if (!result.select && !result.effect && !result.observe) {
+          alarmPreview(info.roomName);
         }
+
+        joinPreview(socket, info.roomName);
+
+        leavePreview(socket, info.roomName);
 
         drawAlarm.messagePreview(info.alarm, info.roomName);
 
         countMessageIconAlarm(info, userId);
 
-        if (onceDraw.alarm(info.roomName) === 1) {
-          drawAlarm.clickIconHide();
-          drawAlarm.clickCloseReDraw();
-        }
+        drawAlarm.clickIconHide();
+
+        drawAlarm.clickCloseReDraw();
       });
 
       function countMessageIconAlarm() {
@@ -1665,72 +1660,86 @@
     checkbox.checked = state === "on" ? true : false;
   };
 
-  const joinPreview = function clickPreviewJoinRoom(socket, roomName) {
-    const container = document.querySelector(
-      `.smpChat__connect__container_${roomName}`
-    );
-    const alarm = document.querySelector(
-      `.smpChat__connect_previewAlarm_${roomName}`
-    );
+  const joinPreview = (function clickPreviewJoinRoom() {
+    return (socket, roomName) => {
+      const container = document.querySelector(
+        `.smpChat__connect__container_${roomName}`
+      );
 
-    container.addEventListener("click", previewJoinClickHandler, false);
+      container.addEventListener(
+        "click",
+        previewJoinClickHandler(socket, roomName),
+        false
+      );
+    };
 
-    function previewJoinClickHandler(e) {
-      if (!e.target.classList.contains("smpChat__connect_previewExit")) {
+    function previewJoinClickHandler(socket, roomName) {
+      return (e) => {
+        e.stopImmediatePropagation();
+
+        const alarm = document.querySelector(
+          `.smpChat__connect_previewAlarm_${roomName}`
+        );
+
         alarm.classList.remove("view");
 
         alarm.textContent = 0;
 
         socketSend(socket).dialog(roomName);
         socketSend(socket).observe(roomName);
-      }
+      };
     }
-  };
+  })();
 
-  const leavePreview = function clickPreviewLeaveRoom(socket, roomName) {
-    const container = document.querySelector(
-      `.smpChat__connect__container_${roomName}`
-    );
-    const chatView = document.querySelector(
-      `.smpChat__dialog__chatView_${roomName}`
-    );
-    const exitBtn = document.querySelector(
-      `.smpChat__connect_previewExit_${roomName}`
-    );
+  const leavePreview = (function clickPreviewLeaveRoom() {
+    return (socket, roomName) => {
+      const exitBtn = document.querySelector(
+        `.smpChat__connect_previewExit_${roomName}`
+      );
+      if (!exitBtn) return;
+      exitBtn.addEventListener(
+        "click",
+        previewLeaveClickHandler(roomName, false)
+      );
+    };
 
-    if (!exitBtn) return;
+    function previewLeaveClickHandler(roomName) {
+      return (e) => {
+        e.stopImmediatePropagation();
 
-    exitBtn.addEventListener("click", previewLeaveClickHandler, false);
+        const container = document.querySelector(
+          `.smpChat__connect__container_${roomName}`
+        );
+        const chatView = document.querySelector(
+          `.smpChat__dialog__chatView_${roomName}`
+        );
 
-    //처음 들어올땐 없었지만
-    //지금은 있다. 
+        if (container && chatView) {
+          if (confirm("채팅방을 나가시겠습니까?")) {
+            container.remove();
 
-    function previewLeaveClickHandler(e) {
-      if (container && chatView) {
-        if (confirm("채팅방을 나가시겠습니까?")) {
-          container.remove();
+            while (chatView.hasChildNodes()) {
+              chatView.removeChild(chatView.firstChild);
+            }
 
-          while (chatView.hasChildNodes()) {
-            chatView.removeChild(chatView.firstChild);
+            chatView.classList.remove(`smpChat__dialog__chatView_${roomName}`);
           }
-
-          chatView.classList.remove(`smpChat__dialog__chatView_${roomName}`);
-        }
-        return;
-      }
-
-      if (container && !chatView) {
-        if (confirm("채팅 요청목록을 지우시겠습니까?")) {
-          container.remove();
-
           return;
         }
-      }
+
+        if (container && !chatView) {
+          if (confirm("채팅 요청목록을 지우시겠습니까?")) {
+            container.remove();
+
+            return;
+          }
+        }
+      };
 
       // socketSend(socket).dialog(roomName);
       // socketSend(socket).observe(roomName);
     }
-  };
+  })();
 
   const loadScroll = function loadDialogScroll(socket) {
     const chatView = document.querySelector(".smpChat__dialog__chatView");
@@ -1918,7 +1927,7 @@
 
     previewRaf = requestAnimationFrame(effectAlarmPreview);
 
-    list.addEventListener("click", stopAlarmPreview, false);
+    list.addEventListener("click", stopAlarmPreview, true);
 
     function effectAlarmPreview(timestamp) {
       let interval = 0;
@@ -2072,44 +2081,6 @@
     return { select, effect };
   };
 
-  const onceDraw = (function checkOnceDraw() {
-    let checkPreview = {};
-    let checkAlarm = 0;
-
-    const onceDrawApi = {
-      preview,
-      alarm,
-    };
-
-    return onceDrawApi;
-
-    function preview(roomName) {
-      const currDom = document.querySelector(
-        `.smpChat__connect__container_${roomName}`
-      );
-
-      if (!checkPreview[roomName]) checkPreview[roomName] = 0;
-
-      if (!currDom) return 0;
-
-      checkPreview[roomName] = checkPreview[roomName] + 1;
-
-      return checkPreview[roomName];
-    }
-
-    function alarm(roomName) {
-      const currDom = document.querySelector(
-        `.smpChat__connect__container_${roomName}`
-      );
-
-      if (!currDom) return 0;
-
-      checkAlarm = checkAlarm + 1;
-
-      return checkAlarm;
-    }
-  })();
-
   const drawAlarm = (function drawChatAlarm() {
     const drawAlarmApi = {
       messagePreview,
@@ -2178,7 +2149,9 @@
 
       icon.addEventListener("click", iconEventHandler, false);
 
-      function iconEventHandler() {
+      function iconEventHandler(e) {
+        e.stopImmediatePropagation();
+
         const container = document.querySelectorAll(
           ".smpChat__connect__container"
         );
@@ -2205,7 +2178,9 @@
 
       close.addEventListener("click", closeEventHandler, false);
 
-      function closeEventHandler() {
+      function closeEventHandler(e) {
+        e.stopImmediatePropagation();
+
         const previewAlarm = document.querySelectorAll(
           ".smpChat__connect_previewAlarm"
         );
