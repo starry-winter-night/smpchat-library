@@ -41,6 +41,16 @@
 
             changeTheme();
 
+            joinRoom(socket, data.type);
+
+            leaveRoom(socket, data.type);
+
+            stopAlarm(data.type);
+
+            drawAlarm.clickIconHide();
+
+            drawAlarm.clickCloseReDraw();
+
             socketReceive(socket).error();
 
             socketReceive(socket).connect();
@@ -137,10 +147,6 @@
 
             alarmPreview(result, logs);
 
-            joinPreview(socket, logs.roomName);
-
-            leavePreview(socket, logs.roomName);
-
             if (alarmCount) {
               drawAlarm.refleshPreview(alarmCount.previewCount, logs.roomName);
 
@@ -152,8 +158,6 @@
             effectSelect(dialog[0].roomName);
           }
         }
-
-        drawAlarm.clickCloseReDraw();
 
         loadScroll(socket);
       });
@@ -168,17 +172,9 @@
 
         alarmPreview(result, info);
 
-        joinPreview(socket, info.roomName);
-
-        leavePreview(socket, info.roomName);
-
         drawAlarm.messagePreview(info.alarm, info.roomName);
 
         countMessageIconAlarm(info, userId);
-
-        drawAlarm.clickIconHide();
-
-        drawAlarm.clickCloseReDraw();
       });
 
       function countMessageIconAlarm() {
@@ -227,10 +223,10 @@
       }
 
       function deletePreview(rooName) {
-        const chatView = document.querySelector(
-          `.smpChat__connect__container_${rooName}`
+        const container = document.querySelector(
+          `.smpChat__connect__container[data-id="${roomName}"]`
         );
-        chatView.remove();
+        container.remove();
       }
     }
     function join(userId) {
@@ -238,8 +234,6 @@
         resetHTML.dialog(dialog[0].roomName);
 
         dialog.forEach((logs) => contentsHTML.drawDialog(logs, userId));
-
-        leavePreview(socket, dialog[0].roomName);
 
         scrollBottom(document.querySelector(".smpChat__dialog__chatView"));
 
@@ -273,8 +267,6 @@
 
         if (message.userId !== userId) {
           drawAlarm.icon(message.alarm);
-
-          drawAlarm.clickCloseReDraw();
 
           observeChatView(socket, message.roomName);
         }
@@ -512,17 +504,16 @@
       navbar.className = "smpChat__section__navbar";
       connect.className = "smpChat__section__connect";
       dialog.className =
-        "smpChat__section__dialog smpChat__section__managerDialog";
-      logo.className = "smpChat__section__logo smpChat__userSelect__none";
-      theme.className = "smpChat__section__theme smpChat__userSelect__none";
-      closeImg.className = "smpChat__section__close smpChat__userSelect__none";
+        "smpChat__section__dialog";
+      logo.className = "smpChat__section__logo";
+      theme.className = "smpChat__section__theme";
+      closeImg.className = "smpChat__section__close";
       alarm.className = "smpChat__message__alarm";
-      smpChatIconImg.className = "smpChatIcon smpChat__userSelect__none";
+      smpChatIconImg.className = "smpChatIcon";
 
       /* connect */
       connNav.className = "smpChat__connect__navbar";
-      connNavInfo.className =
-        "smpChat__connect__navInfo smpChat__userSelect__none";
+      connNavInfo.className = "smpChat__connect__navInfo";
       connList.className = "smpChat__connect__list";
       connSwitch.className = "smpChat__connect__switch";
       connSwitchBall.className = "smpChat__connect__switchBall";
@@ -530,23 +521,19 @@
       connSwitchLabel.className = "smpChat__connect__switchLabel";
       connSwitchInput.id = "smp_chat_switch";
       connSwitchInput.className = "smpChat__connect__switchInput";
-      connSwitchOffP.className =
-        "smpChat__connect__switchOff smpChat__userSelect__none";
-      connSwitchOnP.className =
-        "smpChat__connect__switchOn smpChat__userSelect__none";
+      connSwitchOffP.className = "smpChat__connect__switchOff";
+      connSwitchOnP.className = "smpChat__connect__switchOn";
 
       /* dialog */
       dialogNav.className = "smpChat__dialog__navbar";
       dialogChatView.className = "smpChat__dialog__chatView";
       dialogChatFooter.className = "smpChat__dialog__footer";
-      dialogChatAddImg.className =
-        "smpChat__dialog__addImg smpChat__userSelect__none";
+      dialogChatAddImg.className = "smpChat__dialog__addImg";
       dialogChatAddInput.id = "smp_chat_addImg";
       dialogChatAddInput.className = "smpChat__dialog__addInput";
       dialogChatAddLabel.className = "smpChat__dialog__addLabel";
       dialogChatMsgTextArea.className = "smpChat__dialog__msgTextArea";
-      dialogChatMsgSend.className =
-        "smpChat__dialog__sendImg smpChat__userSelect__none";
+      dialogChatMsgSend.className = "smpChat__dialog__sendImg";
 
       /***************************** set *****************************/
       /* common */
@@ -695,35 +682,30 @@
       navbar.className = "smpChat__section__navbar";
       dialog.className =
         "smpChat__section__dialog smpChat__section__clientDialog";
-      logo.className = "smpChat__section__logo smpChat__userSelect__none";
-      theme.className = "smpChat__section__theme smpChat__userSelect__none";
-      closeImg.className = "smpChat__section__close smpChat__userSelect__none";
-      smpChatIconImg.className = "smpChatIcon smpChat__userSelect__none";
+      logo.className = "smpChat__section__logo";
+      theme.className = "smpChat__section__theme";
+      closeImg.className = "smpChat__section__close";
+      smpChatIconImg.className = "smpChatIcon";
 
       /* dialog */
       dialogNav.className = "smpChat__dialog__navbar";
-      dialogNavInfo.className =
-        "smpChat__dialog__navInfo smpChat__userSelect__none";
+      dialogNavInfo.className = "smpChat__dialog__navInfo";
       dialogSwitch.className = "smpChat__dialog__switch";
       dialogSwitchBall.className = "smpChat__dialog__switchBall";
       dialogSwitchSpan.className = "smpChat__dialog__switchSpan";
       dialogSwitchLabel.className = "smpChat__dialog__switchLabel";
       dialogSwitchInput.id = "smp_chat_switch";
       dialogSwitchInput.className = "smpChat__dialog__switchInput";
-      dialogSwitchOffP.className =
-        "smpChat__dialog__switchOff smpChat__userSelect__none";
-      dialogSwitchOnP.className =
-        "smpChat__dialog__switchOn smpChat__userSelect__none";
+      dialogSwitchOffP.className = "smpChat__dialog__switchOff";
+      dialogSwitchOnP.className = "smpChat__dialog__switchOn";
       dialogChatView.className = "smpChat__dialog__chatView";
       dialogChatFooter.className = "smpChat__dialog__footer";
-      dialogChatAddImg.className =
-        "smpChat__dialog__addImg smpChat__userSelect__none";
+      dialogChatAddImg.className = "smpChat__dialog__addImg";
       dialogChatAddInput.id = "smp_chat_addImg";
       dialogChatAddInput.className = "smpChat__dialog__addInput";
       dialogChatAddLabel.className = "smpChat__dialog__addLabel";
       dialogChatMsgTextArea.className = "smpChat__dialog__msgTextArea";
-      dialogChatMsgSend.className =
-        "smpChat__dialog__sendImg smpChat__userSelect__none";
+      dialogChatMsgSend.className = "smpChat__dialog__sendImg";
 
       /***************************** set *****************************/
       /* common */
@@ -1012,7 +994,7 @@
 
       if (!chatView) {
         chatView = document.querySelector(
-          `.smpChat__dialog__chatView_${userId}`
+          `.smpChat__dialog__chatView[data-id="${userId}"]`
         );
       }
 
@@ -1089,10 +1071,10 @@
       /*  className & id   */
       container.className = "smpChat__dialog__containerLeft";
       contentsContainer.className = "smpChat__dialog__contentContainerLeft";
-      profile.className = "smpChat__dialog__profile smpChat__userSelect__none";
+      profile.className = "smpChat__dialog__profile";
       profileImage.className = "smpChat__dialog__profileImage";
       content.className = "smpChat__dialog__content";
-      time.className = "smpChat__dialog__time smpChat__userSelect__none ";
+      time.className = "smpChat__dialog__time ";
       id.className = "smpChat__dialog__id";
       span.className = "smpChat__dialog__span";
 
@@ -1137,11 +1119,10 @@
       /*  className & id   */
       container.className = "smpChat__dialog__containerLeft";
       contentsContainer.className = "smpChat__dialog__contentContainerLeft";
-      profile.className = "smpChat__dialog__profile smpChat__userSelect__none";
+      profile.className = "smpChat__dialog__profile";
       profileImage.className = "smpChat__dialog__profileImage";
       link.className = "smpChat__dialog__content";
-      time.className =
-        "smpChat__dialog__time smpChat__userSelect__none smpChat__userSelect__none";
+      time.className = "smpChat__dialog__time";
       id.className = "smpChat__dialog__id";
       span.className = "smpChat__dialog__span";
 
@@ -1202,11 +1183,10 @@
       /*  className & id   */
       container.className = "smpChat__dialog__containerLeft";
       contentsContainer.className = "smpChat__dialog__contentContainerLeft";
-      profile.className = "smpChat__dialog__profile smpChat__userSelect__none";
+      profile.className = "smpChat__dialog__profile";
       profileImage.className = "smpChat__dialog__profileImage";
       content.className = "smpChat__dialog__content";
-      time.className =
-        "smpChat__dialog__time smpChat__userSelect__none smpChat__userSelect__none";
+      time.className = "smpChat__dialog__time";
       id.className = "smpChat__dialog__id";
       span.className = "smpChat__dialog__span";
 
@@ -1241,7 +1221,7 @@
       container.className = "smpChat__dialog__containerRight";
       contentsContainer.className = "smpChat__dialog__contentContainerRight";
       content.className = "smpChat__dialog__content";
-      time.className = "smpChat__dialog__time smpChat__userSelect__none";
+      time.className = "smpChat__dialog__time";
 
       /*  set  */
       time.setAttribute("datetime", createTimeDate());
@@ -1277,8 +1257,8 @@
       /*  className & id   */
       content.className = "smpChat__dialog__content";
       contentImage.className = "smpChat__dialog__contentImage";
-      time.className = "smpChat__dialog__time smpChat__userSelect__none";
-      observe.className = "smpChat__dialog__observe smpChat__userSelect__none";
+      time.className = "smpChat__dialog__time";
+      observe.className = "smpChat__dialog__observe";
 
       /*  set  */
       time.setAttribute("datetime", registerTime);
@@ -1315,10 +1295,9 @@
 
         /*  className & id   */
         id.className = "smpChat__dialog__id";
-        profile.className =
-          "smpChat__dialog__profile smpChat__userSelect__none";
+        profile.className = "smpChat__dialog__profile";
         profileImage.className = "smpChat__dialog__profileImage";
-        dialog.className = `smpChat__dialog__chatView smpChat__dialog__chatView_${roomName}`;
+        dialog.className = "smpChat__dialog__chatView";
         container.className = "smpChat__dialog__containerLeft";
         contentsContainer.className =
           image !== null
@@ -1326,6 +1305,7 @@
             : "smpChat__dialog__contentContainerLeft";
 
         /*  set  */
+        dialog.dataset.id = roomName;
         profileImage.src =
           msg.userType === "manager"
             ? "http://localhost:5000/smpChat/image?name=smpark.jpg"
@@ -1382,11 +1362,11 @@
       const time = document.createElement("time");
 
       const chatView = document.querySelector(
-        `.smpChat__dialog__chatView_${currUserId}`
+        `.smpChat__dialog__chatView[data-id="${currUserId}"]`
       );
 
       if (!chatView) {
-        dialog.classList.add(`smpChat__dialog__chatView_${roomName}`);
+        dialog.dataset.id = roomName;
       }
 
       /*  textNode  */
@@ -1400,7 +1380,7 @@
       /*  className & id   */
       content.className = "smpChat__dialog__content";
       contentImage.className = `smpChat__dialog__contentImage smpChat__dialog__contentImage_${userId}`;
-      time.className = `smpChat__dialog__time smpChat__dialog__time_${userId} smpChat__dialog__time smpChat__userSelect__none`;
+      time.className = `smpChat__dialog__time smpChat__dialog__time_${userId} smpChat__dialog__time`;
 
       /*  set  */
       time.setAttribute("datetime", registerTime);
@@ -1421,7 +1401,6 @@
         profile.appendChild(profileImage);
         profile.appendChild(id);
         profile.appendChild(span);
-
         container.appendChild(profile);
         container.appendChild(time);
         if (image !== null) {
@@ -1434,8 +1413,7 @@
         container.appendChild(time);
         /*  className & id   */
         id.className = "smpChat__dialog__id";
-        profile.className =
-          "smpChat__dialog__profile smpChat__userSelect__none";
+        profile.className = "smpChat__dialog__profile";
         profileImage.className = "smpChat__dialog__profileImage";
         container.className = "smpChat__dialog__containerLeft";
         contentsContainer.className =
@@ -1489,8 +1467,7 @@
 
       /*  className & id   */
       container.className = "smpChat__dialog__systemBar";
-      content.className =
-        "smpChat__dialog__systemMsg smpChat__userSelect__none";
+      content.className = "smpChat__dialog__systemMsg";
 
       /*  function  */
       scrollBottom(dialog);
@@ -1505,17 +1482,17 @@
       const content = document.createElement("p");
       const time = document.createElement("time");
       const container = document.querySelector(
-        `.smpChat__connect__container_${roomName}`
+        `.smpChat__connect__container[data-id="${roomName}"]`
       );
 
       container ? addPreview() : createPreview();
 
       function addPreview() {
         const content = document.querySelector(
-          `.smpChat__connect__content_${roomName}`
+          `.smpChat__connect__content[data-id="${roomName}"]`
         );
         const time = document.querySelector(
-          `.smpChat__connect__time_${roomName}`
+          `.smpChat__connect__time[data-id="${roomName}"]`
         );
 
         /*  textNode  */
@@ -1551,18 +1528,22 @@
         connect.appendChild(container);
 
         /*  className & id   */
-        id.className = "smpChat__connect__id smpChat__userSelect__none";
-        time.className = `smpChat__connect__time smpChat__connect__time_${roomName} smpChat__userSelect__none`;
-        content.className = `smpChat__connect__content smpChat__connect__content_${roomName} smpChat__userSelect__none`;
-        container.className = `smpChat__connect__container smpChat__connect__container_${roomName} smpChat__userSelect__none`;
-        previewExit.className = `smpChat__connect_previewExit smpChat__connect_previewExit_${roomName} smpChat__userSelect__none`;
-        previewAlarm.className = `smpChat__connect_previewAlarm smpChat__connect_previewAlarm_${roomName} smpChat__userSelect__none`;
+        id.className = "smpChat__connect__id";
+        time.className = "smpChat__connect__time";
+        content.className = "smpChat__connect__content";
+        container.className = "smpChat__connect__container";
+        previewExit.className = "smpChat__connect_previewExit";
+        previewAlarm.className = "smpChat__connect_previewAlarm";
         contentsContainer.className = "smpChat__connect__contentsContainer";
 
         /*  set  */
-        time.setAttribute("datetime", registerTime);
-        previewExit.src = `http://localhost:5000/smpChat/image?name=greyXbtn.png`;
+        previewAlarm.dataset.id = roomName;
+        previewExit.dataset.id = roomName;
         container.dataset.id = roomName;
+        content.dataset.id = roomName;
+        time.dataset.id = roomName;
+        previewExit.src = `http://localhost:5000/smpChat/image?name=greyXbtn.png`;
+        time.setAttribute("datetime", registerTime);
 
         /*  function  */
         elapseMessageTime(time);
@@ -1685,80 +1666,87 @@
     checkbox.checked = state === "on" ? true : false;
   };
 
-  const joinPreview = (function clickPreviewJoinRoom() {
-    return (socket, roomName) => {
-      const container = document.querySelector(
-        `.smpChat__connect__container_${roomName}`
-      );
+  const joinRoom = (function clickPreviewJoinRoom() {
+    return (socket, type) => {
+      if (type !== "manager") return;
 
-      container.addEventListener(
-        "click",
-        previewJoinClickHandler(socket, roomName),
-        false
-      );
+      const list = document.querySelector(".smpChat__connect__list");
+
+      list.addEventListener("click", joinRoomOnClickHandler(socket));
     };
 
-    function previewJoinClickHandler(socket, roomName) {
+    function joinRoomOnClickHandler(socket) {
       return (e) => {
-        e.stopImmediatePropagation();
+        const container = e.target.closest(".smpChat__connect__container");
 
-        const alarm = document.querySelector(
-          `.smpChat__connect_previewAlarm_${roomName}`
-        );
+        if (container) {
+          const target = e.target;
+          const id = container.dataset.id;
+          const alarm = document.querySelector(
+            `.smpChat__connect_previewAlarm[data-id="${id}"]`
+          );
+          const leaveBtn = document.querySelector(
+            `.smpChat__connect_previewExit[data-id="${id}"]`
+          );
 
-        alarm.classList.remove("view");
+          if (target === leaveBtn) return;
 
-        alarm.textContent = 0;
+          if (alarm) {
+            alarm.classList.remove("view");
+            alarm.textContent = 0;
+          }
 
-        socketSend(socket).join(roomName);
-        socketSend(socket).observe(roomName);
+          socketSend(socket).join(id);
+          socketSend(socket).observe(id);
+        }
       };
     }
   })();
 
-  const leavePreview = (function clickPreviewLeaveRoom() {
-    return (socket, roomName) => {
-      const exitBtn = document.querySelector(
-        `.smpChat__connect_previewExit_${roomName}`
-      );
-      if (!exitBtn) return;
-      exitBtn.addEventListener(
-        "click",
-        previewLeaveClickHandler(socket, roomName, false)
-      );
+  const leaveRoom = (function clickPreviewLeaveRoom() {
+    return (socket, type) => {
+      if (type !== "manager") return;
+
+      const list = document.querySelector(".smpChat__connect__list");
+
+      list.addEventListener("click", leaveRoomOnClickHandler(socket));
     };
 
-    function previewLeaveClickHandler(socket, roomName) {
+    function leaveRoomOnClickHandler(socket) {
       return (e) => {
-        e.stopImmediatePropagation();
+        const container = e.target.closest(".smpChat__connect__container");
 
-        const container = document.querySelector(
-          `.smpChat__connect__container_${roomName}`
-        );
-        const chatView = document.querySelector(
-          `.smpChat__dialog__chatView_${roomName}`
-        );
+        if (container) {
+          const target = e.target;
+          const id = container.dataset.id;
+          const leaveBtn = document.querySelector(
+            `.smpChat__connect_previewExit[data-id="${id}"]`
+          );
+          const chatView = document.querySelector(
+            `.smpChat__dialog__chatView[data-id="${id}"]`
+          );
 
-        if (container && chatView) {
-          if (confirm("채팅방을 나가시겠습니까?")) {
-            container.remove();
+          if (target === leaveBtn) {
+            if (chatView) {
+              if (confirm("채팅방을 나가시겠습니까?")) {
+                container.remove();
 
-            while (chatView.hasChildNodes()) {
-              chatView.removeChild(chatView.firstChild);
+                while (chatView.hasChildNodes()) {
+                  chatView.removeChild(chatView.firstChild);
+                }
+
+                socketSend(socket).leave(id);
+              }
+              return;
             }
 
-            chatView.classList.remove(`smpChat__dialog__chatView_${roomName}`);
+            if (!chatView) {
+              if (confirm("채팅 요청목록을 지우시겠습니까?")) {
+                container.remove();
 
-            socketSend(socket).leave(roomName);
-          }
-          return;
-        }
-
-        if (container && !chatView) {
-          if (confirm("채팅 요청목록을 지우시겠습니까?")) {
-            container.remove();
-
-            return;
+                return;
+              }
+            }
           }
         }
       };
@@ -1950,9 +1938,8 @@
   const alarmPreview = function alarmNewPreview(check, { roomName, observe }) {
     if (!check.select && !check.effect && !observe) {
       const container = document.querySelector(
-        `.smpChat__connect__container_${roomName}`
+        `.smpChat__connect__container[data-id="${roomName}"]`
       );
-      const list = document.querySelector(".smpChat__connect__list");
       let previewRaf = null;
       let opacity = 0;
       let startTime = 0;
@@ -1960,9 +1947,7 @@
 
       container.classList.add("effect");
 
-      previewRaf = requestAnimationFrame(effectAlarmPreview);
-
-      list.addEventListener("click", stopAlarmPreview, true);
+      requestAnimationFrame(effectAlarmPreview);
 
       function effectAlarmPreview(timestamp) {
         let interval = 0;
@@ -1986,6 +1971,8 @@
         }
 
         previewRaf = requestAnimationFrame(effectAlarmPreview);
+
+        container.dataset.raf = previewRaf;
       }
 
       function applyPreviewColor() {
@@ -1999,34 +1986,32 @@
 
         return color.substring(0, color.length - 1);
       }
+    }
+  };
 
-      function stopAlarmPreview(e) {
-        if (!e.target.classList.contains("smpChat__connect_previewExit")) {
-          const targetDom = eventDelegation(
-            e.target,
-            "smpChat__connect__container"
-          );
+  const stopAlarm = function stopPreviewAlarm(type) {
+    if (type === "client") return;
 
-          if (targetDom === container) {
-            container.style.outline = "none";
-            container.style.boxShadow = "none";
+    const list = document.querySelector(".smpChat__connect__list");
 
-            cancelAnimationFrame(previewRaf);
-          }
-        }
+    list.addEventListener("click", stopAlarmOnClickHandler);
 
-        function eventDelegation(targetDom, domName) {
-          while (!targetDom.classList.contains(domName)) {
-            targetDom = targetDom.parentNode;
+    function stopAlarmOnClickHandler(e) {
+      const target = e.target;
+      const container = target.closest(".smpChat__connect__container");
+      const id = container.dataset.id;
+      const exitBtn = document.querySelector(
+        `.smpChat__connect_previewExit[data-id="${id}"]`
+      );
 
-            if (targetDom.nodeName === "SECTION") {
-              targetDom = null;
-              return;
-            }
-          }
+      if (target === exitBtn) return;
 
-          return targetDom;
-        }
+      if (container) {
+        container.style.outline = "none";
+        container.style.boxShadow = "none";
+        const previewRaf = container.dataset.raf;
+
+        cancelAnimationFrame(previewRaf);
       }
     }
   };
@@ -2040,7 +2025,7 @@
     container.forEach((dom) => dom.classList.remove("select"));
 
     const clickedDom = document.querySelector(
-      `.smpChat__connect__container_${roomName}`
+      `.smpChat__connect__container[data-id="${roomName}"]`
     );
 
     if (clickedDom) {
@@ -2053,7 +2038,7 @@
 
   const observeChatView = function observeMessageRead(socket, roomName) {
     const chatView = document.querySelector(
-      `.smpChat__dialog__chatView_${roomName}`
+      `.smpChat__dialog__chatView[data-id="${roomName}"]`
     );
 
     const icon = document.querySelector(".smpChatIcon");
@@ -2105,14 +2090,14 @@
   };
 
   const checkEffectPreview = function checkPreviewSelectAndEffect(roomName) {
-    const currPreview = document.querySelector(
-      `.smpChat__connect__container_${roomName}`
+    const currContainer = document.querySelector(
+      `.smpChat__connect__container[data-id="${roomName}"]`
     );
     let select = false;
     let effect = false;
 
-    if (currPreview.classList.contains("select")) select = true;
-    if (currPreview.classList.contains("effect")) effect = true;
+    if (currContainer.classList.contains("select")) select = true;
+    if (currContainer.classList.contains("effect")) effect = true;
 
     return { select, effect };
   };
@@ -2131,10 +2116,10 @@
     function messagePreview(count, roomName) {
       const section = document.querySelector(".smpChat__section");
       const previewAlarm = document.querySelector(
-        `.smpChat__connect_previewAlarm_${roomName}`
+        `.smpChat__connect_previewAlarm[data-id="${roomName}"]`
       );
       const chatView = document.querySelector(
-        `.smpChat__dialog__chatView_${roomName}`
+        `.smpChat__dialog__chatView[data-id="${roomName}"]`
       );
 
       if (typeof count === "number" && count > 0) {
@@ -2148,10 +2133,10 @@
 
     function refleshPreview(count, roomName) {
       const previewAlarm = document.querySelector(
-        `.smpChat__connect_previewAlarm_${roomName}`
+        `.smpChat__connect_previewAlarm[data-id="${roomName}"]`
       );
       const chatView = document.querySelector(
-        `.smpChat__dialog__chatView_${roomName}`
+        `.smpChat__dialog__chatView[data-id="${roomName}"]`
       );
 
       if (typeof count === "object" && !chatView) {
@@ -2183,11 +2168,9 @@
     function clickIconHide() {
       const icon = document.querySelector(".smpChatIcon");
 
-      icon.addEventListener("click", iconEventHandler, false);
+      icon.addEventListener("click", iconHideOnclickHandler, false);
 
-      function iconEventHandler(e) {
-        e.stopImmediatePropagation();
-
+      function iconHideOnclickHandler(e) {
         const container = document.querySelectorAll(
           ".smpChat__connect__container"
         );
@@ -2197,7 +2180,7 @@
           if (dom.classList.contains("select")) {
             const id = dom.dataset.id;
             const alarm = document.querySelector(
-              `.smpChat__connect_previewAlarm_${id}`
+              `.smpChat__connect_previewAlarm[data-id="${id}"]`
             );
 
             alarm.textContent = 0;
@@ -2212,11 +2195,9 @@
       const close = document.querySelector(".smpChat__section__close");
       const iconAlarm = document.querySelector(".smpChat__message__alarm");
 
-      close.addEventListener("click", closeEventHandler, false);
+      close.addEventListener("click", closeReDrawOnClickHandler, false);
 
-      function closeEventHandler(e) {
-        e.stopImmediatePropagation();
-
+      function closeReDrawOnClickHandler(e) {
         const previewAlarm = document.querySelectorAll(
           ".smpChat__connect_previewAlarm"
         );
@@ -2250,7 +2231,6 @@
       }
     }
   })();
-
   class SmpChatError extends Error {
     constructor(message) {
       super(message);
