@@ -45,7 +45,7 @@ v1.0.0
 - 이미지 전송  
   <img src="src/public/image/image.gif" alt='Send Image Chat'>
 
-- 메시지 확인 & 메시지 시간
+- 메시지 확인 & 메시지 시간   
   <img src="src/public/image/time&read.png" alt='Message Time & Check Read'>
 
 - 그 외
